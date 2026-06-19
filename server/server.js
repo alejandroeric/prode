@@ -19,6 +19,9 @@ app.get('/api/ping', (req, res) => {
   res.json({ ok: true, mensaje: 'El servidor del Prode esta vivo' });
 });
 
+// Rutas de futbol (datos de equipos, fixture, etc.) bajo el prefijo /api.
+app.use('/api', require('./routes/futbol'));
+
 app.listen(PORT, () => {
   console.log(`Servidor del Prode corriendo en http://localhost:${PORT}`);
 });
