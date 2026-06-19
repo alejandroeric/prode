@@ -4,7 +4,14 @@
       "Bash(git init *)",
       "Bash(git branch *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(npm --version)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell($paths = @\\(\"$env:ProgramFiles\\\\nodejs\\\\node.exe\", \"${env:ProgramFiles\\(x86\\)}\\\\nodejs\\\\node.exe\", \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\\\\node.exe\", \"$env:APPDATA\\\\npm\\\\node.exe\"\\); foreach \\($p in $paths\\) { if \\(Test-Path $p\\) { Write-Output \"ENCONTRADO: $p\"; & $p --version } else { Write-Output \"no esta: $p\" } }; Write-Output \"--- Busqueda en nvm ---\"; if \\(Test-Path \"$env:APPDATA\\\\nvm\"\\) { Get-ChildItem \"$env:APPDATA\\\\nvm\" -Directory | Select-Object -ExpandProperty Name } else { Write-Output \"no hay carpeta nvm\" })",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; Write-Output \"node:\"; node --version; Write-Output \"npm:\"; npm --version)",
+      "PowerShell($dirs = @\\(\"server\\\\routes\", \"server\\\\services\", \"public\\\\css\", \"public\\\\js\"\\); foreach \\($d in $dirs\\) { New-Item -ItemType Directory -Force -Path $d | Out-Null }; Write-Output \"Carpetas creadas:\"; Get-ChildItem -Recurse -Directory | Select-Object -ExpandProperty FullName)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; $job = Start-Job -ScriptBlock { Set-Location \"C:\\\\Users\\\\proyectos\\\\prode\"; $env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; node server/server.js }; Start-Sleep -Seconds 3; try { $ping = Invoke-RestMethod -Uri \"http://localhost:3000/api/ping\" -TimeoutSec 5; Write-Output \"RESPUESTA DEL SERVIDOR:\"; $ping | ConvertTo-Json; $home = Invoke-WebRequest -Uri \"http://localhost:3000/\" -TimeoutSec 5; Write-Output \"PAGINA PRINCIPAL: codigo HTTP $\\($home.StatusCode\\)\" } catch { Write-Output \"ERROR: $_\" } finally { Stop-Job $job; Remove-Job $job })"
     ]
   }
 }

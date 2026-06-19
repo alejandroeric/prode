@@ -1,0 +1,47 @@
+/* estilos.css — Estilos base del Prode.
+   Diseño oscuro, agresivo y moderno (inspiracion: Bet365 / Codere).
+   Por ahora solo la pantalla de inicio; se ira ampliando por modulo. */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background-color: #0a0f0a;
+  color: #ffffff;
+  min-height: 100vh;
+}
+
+.pantalla-inicio {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #00e676;
+}
+
+.subtitulo {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #b0b0b0;
+}
+
+.estado {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: #888;
+}

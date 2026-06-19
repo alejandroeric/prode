@@ -1,0 +1,15 @@
+{
+  "name": "prode-futbol-argentino",
+  "version": "0.1.0",
+  "description": "Juego web privado de pronosticos de la Liga Profesional de Futbol Argentino",
+  "main": "server/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "author": "Eric Nofal",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
