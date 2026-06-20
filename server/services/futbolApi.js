@@ -68,7 +68,8 @@ function normalizarPartido(crudo) {
     escudo_visitante: crudo.strAwayTeamBadge || null,
     fecha: crudo.dateEvent,
     hora: crudo.strTime,
-    inicio: crudo.strTimestamp,
+    // strTimestamp viene en UTC sin marca de zona; le agregamos 'Z' para dejarlo listo.
+    inicio: crudo.strTimestamp ? crudo.strTimestamp + 'Z' : null,
     goles_local: aNumero(crudo.intHomeScore),
     goles_visitante: aNumero(crudo.intAwayScore),
     estado: traducirEstado(crudo.strStatus, crudo.strPostponed),

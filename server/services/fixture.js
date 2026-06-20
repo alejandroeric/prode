@@ -4,6 +4,7 @@
 
 const { supabase } = require('./supabase');
 const futbolApi = require('./futbolApi');
+const apiFootball = require('./apiFootball');
 
 // Convierte un partido normalizado de la API a una fila de la tabla "partidos".
 function aFila(p) {
@@ -15,8 +16,7 @@ function aFila(p) {
     visitante: p.visitante,
     escudo_local: p.escudo_local,
     escudo_visitante: p.escudo_visitante,
-    // strTimestamp viene en UTC sin marca; le agregamos 'Z' para guardarlo bien.
-    inicio: p.inicio ? (p.inicio.endsWith('Z') ? p.inicio : p.inicio + 'Z') : null,
+    inicio: p.inicio || null, // cada proveedor ya devuelve la fecha lista para guardar
     goles_local: p.goles_local,
     goles_visitante: p.goles_visitante,
     estado: p.estado,
@@ -54,6 +54,13 @@ async function sincronizarFecha(numero, temporada) {
   return { recibidos: partidos.length, guardados };
 }
 
+// Importa una temporada COMPLETA y finalizada desde API-Football (datos de prueba).
+async function importarTemporada(temporada) {
+  const partidos = await apiFootball.obtenerTemporadaCompleta(temporada);
+  const guardados = await guardarPartidos(partidos);
+  return { recibidos: partidos.length, guardados };
+}
+
 // Lista todos los partidos guardados, ordenados por fecha de inicio.
 async function listarPartidos() {
   const { data, error } = await supabase
@@ -64,4 +71,10 @@ async function listarPartidos() {
   return data;
 }
 
-module.exports = { sincronizarDesdeApi, sincronizarFecha, listarPartidos, guardarPartidos };
+module.exports = {
+  sincronizarDesdeApi,
+  sincronizarFecha,
+  importarTemporada,
+  listarPartidos,
+  guardarPartidos,
+};
