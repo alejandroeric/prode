@@ -109,6 +109,37 @@ async function crearPartidoManual(datos) {
   return data;
 }
 
+// Crea VARIOS partidos de una sola vez (usado por la carga via captura de pantalla).
+// Busca los escudos de cada equipo una sola vez para ser eficiente.
+async function crearPartidosEnLote(partidos, origen = 'captura') {
+  if (!partidos || partidos.length === 0) return 0;
+
+  // Juntar todos los equipos distintos y buscar sus escudos una sola vez.
+  const equipos = new Set();
+  partidos.forEach((p) => { equipos.add(p.local); equipos.add(p.visitante); });
+  const escudos = {};
+  await Promise.all([...equipos].map(async (e) => { escudos[e] = await buscarEscudo(e); }));
+
+  const filas = partidos.map((p) => ({
+    temporada: p.temporada,
+    fecha_numero: p.fecha_numero,
+    local: p.local,
+    visitante: p.visitante,
+    inicio: p.inicio || null,
+    estadio: p.estadio || null,
+    escudo_local: escudos[p.local] || null,
+    escudo_visitante: escudos[p.visitante] || null,
+    goles_local: p.goles_local ?? null,
+    goles_visitante: p.goles_visitante ?? null,
+    estado: p.estado || 'proximo',
+    origen,
+  }));
+
+  const { error } = await supabase.from('partidos').insert(filas);
+  if (error) throw new Error(error.message);
+  return filas.length;
+}
+
 // Actualiza un partido (solo campos permitidos: resultado, estado, datos basicos).
 async function actualizarPartido(id, cambios) {
   const permitidos = {};
@@ -172,6 +203,7 @@ module.exports = {
   temporadasDisponibles,
   partidosDeFecha,
   crearPartidoManual,
+  crearPartidosEnLote,
   actualizarPartido,
   borrarPartido,
   guardarPartidos,

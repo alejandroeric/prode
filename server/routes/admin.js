@@ -8,6 +8,7 @@ const {
   sincronizarDesdeApi,
   listarPartidos,
   crearPartidoManual,
+  crearPartidosEnLote,
   actualizarPartido,
   borrarPartido,
 } = require('../services/fixture');
@@ -108,6 +109,20 @@ router.post('/partidos', requiereAdmin, async (req, res) => {
     res.status(201).json(partido);
   } catch (e) {
     res.status(500).json({ error: 'No se pudo crear el partido', detalle: e.message });
+  }
+});
+
+// POST /api/admin/partidos/lote  ->  crea varios partidos de una vez (carga por captura).
+router.post('/partidos/lote', requiereAdmin, async (req, res) => {
+  const { partidos, origen } = req.body || {};
+  if (!Array.isArray(partidos) || partidos.length === 0) {
+    return res.status(400).json({ error: 'Falta la lista de partidos' });
+  }
+  try {
+    const guardados = await crearPartidosEnLote(partidos, origen || 'captura');
+    res.status(201).json({ guardados });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudieron cargar los partidos', detalle: e.message });
   }
 });
 
