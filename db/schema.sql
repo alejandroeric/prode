@@ -22,3 +22,24 @@ create table jugadores (
 -- Seguridad: bloquea el acceso directo desde el navegador.
 -- Solo el backend (con la secret key) puede tocar esta tabla.
 alter table jugadores enable row level security;
+
+-- Tabla de partidos (fixture). Recibe datos de 3 origenes: api, manual y captura.
+create table partidos (
+  id               uuid primary key default gen_random_uuid(),
+  id_externo       text unique,        -- id del partido en la API (NULL si es manual)
+  temporada        text,
+  fecha_numero     integer,
+  local            text not null,
+  visitante        text not null,
+  escudo_local     text,
+  escudo_visitante text,
+  inicio           timestamptz,        -- dia y hora exactos del partido
+  goles_local      integer,
+  goles_visitante  integer,
+  estado           text not null default 'proximo',  -- proximo/en_juego/finalizado/suspendido
+  estadio          text,
+  origen           text not null default 'api',       -- api / manual
+  creado_en        timestamptz not null default now()
+);
+
+alter table partidos enable row level security;
