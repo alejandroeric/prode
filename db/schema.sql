@@ -43,3 +43,17 @@ create table partidos (
 );
 
 alter table partidos enable row level security;
+
+-- Tabla de pronosticos: la prediccion de cada jugador para cada partido.
+create table pronosticos (
+  id              uuid primary key default gen_random_uuid(),
+  jugador_id      uuid not null references jugadores(id) on delete cascade,
+  partido_id      uuid not null references partidos(id) on delete cascade,
+  goles_local     integer not null,
+  goles_visitante integer not null,
+  creado_en       timestamptz not null default now(),
+  actualizado_en  timestamptz not null default now(),
+  unique (jugador_id, partido_id)   -- un pronostico por jugador y por partido
+);
+
+alter table pronosticos enable row level security;
