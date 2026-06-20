@@ -57,3 +57,16 @@ create table pronosticos (
 );
 
 alter table pronosticos enable row level security;
+
+-- Tabla de grupos (ligas privadas): cada grupo tiene sus propios jugadores y su tabla.
+-- El fixture (partidos) es compartido por todos los grupos.
+create table grupos (
+  id        uuid primary key default gen_random_uuid(),
+  nombre    text not null,
+  creado_en timestamptz not null default now()
+);
+
+alter table grupos enable row level security;
+
+-- Cada jugador pertenece a un grupo. Si se borra el grupo, el jugador queda sin grupo (no se borra).
+alter table jugadores add column grupo_id uuid references grupos(id) on delete set null;
