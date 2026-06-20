@@ -213,4 +213,119 @@ btnSincronizar.addEventListener('click', async () => {
   }
 });
 
+// ----- Carga manual y edicion de partidos -----
+
+const formPartido = document.getElementById('form-partido');
+const errorPartido = document.getElementById('error-partido');
+const listaAdminPartidos = document.getElementById('lista-admin-partidos');
+
+// Crear un partido manual.
+formPartido.addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  errorPartido.textContent = '';
+
+  const inicioLocal = document.getElementById('m-inicio').value;
+  const cuerpo = {
+    temporada: document.getElementById('m-temporada').value,
+    fecha_numero: Number(document.getElementById('m-fecha').value),
+    local: document.getElementById('m-local').value,
+    visitante: document.getElementById('m-visitante').value,
+    // datetime-local es hora local; lo pasamos a formato universal.
+    inicio: inicioLocal ? new Date(inicioLocal).toISOString() : null,
+    estadio: document.getElementById('m-estadio').value,
+  };
+
+  try {
+    const res = await fetch('/api/admin/partidos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
+      body: JSON.stringify(cuerpo),
+    });
+    if (res.ok) {
+      formPartido.reset();
+      cargarConteoPartidos();
+      // Si el visor esta mirando esa misma fecha, lo refrescamos.
+      verPartidosDeFecha();
+    } else {
+      const datos = await res.json();
+      errorPartido.textContent = datos.error || 'No se pudo cargar el partido';
+    }
+  } catch {
+    errorPartido.textContent = 'No se pudo conectar con el servidor';
+  }
+});
+
+// Ver los partidos de una temporada + fecha para editarlos o borrarlos.
+async function verPartidosDeFecha() {
+  const temporada = document.getElementById('v-temporada').value;
+  const fecha = document.getElementById('v-fecha').value;
+  if (!temporada || !fecha) return;
+
+  try {
+    const res = await fetch(`/api/fixture?temporada=${temporada}&fecha=${fecha}`);
+    const partidos = await res.json();
+    dibujarAdminPartidos(partidos);
+  } catch {
+    listaAdminPartidos.innerHTML = '<li class="vacio">No se pudo cargar.</li>';
+  }
+}
+
+// Dibuja cada partido con campos para resultado/estado y boton de borrar.
+function dibujarAdminPartidos(partidos) {
+  listaAdminPartidos.innerHTML = '';
+  if (!partidos.length) {
+    listaAdminPartidos.innerHTML = '<li class="vacio">No hay partidos en esa fecha.</li>';
+    return;
+  }
+
+  const estados = ['proximo', 'en_juego', 'finalizado', 'suspendido'];
+
+  for (const p of partidos) {
+    const li = document.createElement('li');
+    li.className = 'jugador';
+    const opciones = estados
+      .map((e) => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${e}</option>`)
+      .join('');
+
+    li.innerHTML = `
+      <div class="jugador-info">
+        <span class="jugador-nombre">${p.local} vs ${p.visitante}</span>
+      </div>
+      <div class="editar-partido">
+        <input type="number" class="gol-input" value="${p.goles_local ?? ''}" placeholder="-" />
+        <input type="number" class="gol-input" value="${p.goles_visitante ?? ''}" placeholder="-" />
+        <select class="select-estado">${opciones}</select>
+        <button type="button" class="btn-guardar">Guardar</button>
+        <button type="button" class="btn-borrar">Borrar</button>
+      </div>
+    `;
+
+    const [golL, golV] = li.querySelectorAll('.gol-input');
+    const selEstado = li.querySelector('.select-estado');
+
+    li.querySelector('.btn-guardar').addEventListener('click', async () => {
+      await fetch(`/api/admin/partidos/${p.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
+        body: JSON.stringify({
+          goles_local: golL.value === '' ? null : Number(golL.value),
+          goles_visitante: golV.value === '' ? null : Number(golV.value),
+          estado: selEstado.value,
+        }),
+      });
+      verPartidosDeFecha();
+    });
+
+    li.querySelector('.btn-borrar').addEventListener('click', async () => {
+      await fetch(`/api/admin/partidos/${p.id}`, { method: 'DELETE', headers: cabeceraAuth() });
+      cargarConteoPartidos();
+      verPartidosDeFecha();
+    });
+
+    listaAdminPartidos.appendChild(li);
+  }
+}
+
+document.getElementById('btn-ver-fecha').addEventListener('click', verPartidosDeFecha);
+
 verificarSesion();

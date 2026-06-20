@@ -42,6 +42,28 @@
       <p class="texto-ayuda" id="estado-fixture"></p>
       <p class="texto-ayuda" id="conteo-partidos">Partidos cargados: —</p>
 
+      <h3 class="subtitulo-mini">Cargar partido manual</h3>
+      <form id="form-partido" class="formulario">
+        <div class="fila-campos">
+          <input type="text" id="m-temporada" placeholder="Temporada (ej: 2026)" required />
+          <input type="number" id="m-fecha" placeholder="N° fecha" required />
+        </div>
+        <input type="text" id="m-local" placeholder="Equipo local" required />
+        <input type="text" id="m-visitante" placeholder="Equipo visitante" required />
+        <input type="datetime-local" id="m-inicio" />
+        <input type="text" id="m-estadio" placeholder="Estadio (opcional)" />
+        <button type="submit">Cargar partido</button>
+        <p class="error" id="error-partido"></p>
+      </form>
+
+      <h3 class="subtitulo-mini">Editar / borrar por fecha</h3>
+      <div class="fila-campos">
+        <input type="text" id="v-temporada" placeholder="Temporada" />
+        <input type="number" id="v-fecha" placeholder="N° fecha" />
+        <button type="button" id="btn-ver-fecha">Ver</button>
+      </div>
+      <ul id="lista-admin-partidos" class="lista-jugadores"></ul>
+
       <button id="btn-logout" class="boton-secundario">Cerrar sesión</button>
     </section>
 

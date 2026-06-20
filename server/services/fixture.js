@@ -71,6 +71,70 @@ async function listarPartidos() {
   return data;
 }
 
+// Busca el escudo de un equipo por su nombre (best-effort: null si no lo encuentra).
+async function buscarEscudo(nombre) {
+  try {
+    const eq = await futbolApi.buscarEquipo(nombre);
+    return eq ? eq.escudo : null;
+  } catch {
+    return null;
+  }
+}
+
+// Crea un partido cargado a mano (origen 'manual'). Intenta completar los escudos solo.
+async function crearPartidoManual(datos) {
+  const [escudoLocal, escudoVisitante] = await Promise.all([
+    buscarEscudo(datos.local),
+    buscarEscudo(datos.visitante),
+  ]);
+
+  const { data, error } = await supabase
+    .from('partidos')
+    .insert({
+      temporada: datos.temporada,
+      fecha_numero: datos.fecha_numero,
+      local: datos.local,
+      visitante: datos.visitante,
+      inicio: datos.inicio || null,
+      estadio: datos.estadio || null,
+      escudo_local: escudoLocal,
+      escudo_visitante: escudoVisitante,
+      estado: 'proximo',
+      origen: 'manual',
+    })
+    .select('*')
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// Actualiza un partido (solo campos permitidos: resultado, estado, datos basicos).
+async function actualizarPartido(id, cambios) {
+  const permitidos = {};
+  const campos = ['goles_local', 'goles_visitante', 'estado', 'inicio', 'estadio',
+    'local', 'visitante', 'fecha_numero', 'temporada'];
+  for (const c of campos) {
+    if (cambios[c] !== undefined) permitidos[c] = cambios[c];
+  }
+
+  const { data, error } = await supabase
+    .from('partidos')
+    .update(permitidos)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// Borra un partido por su id.
+async function borrarPartido(id) {
+  const { error } = await supabase.from('partidos').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
 // Devuelve las temporadas disponibles con sus numeros de fecha.
 // Ej: [{ temporada: '2023', fechas: [1,2,3,...] }]
 async function temporadasDisponibles() {
@@ -107,5 +171,8 @@ module.exports = {
   listarPartidos,
   temporadasDisponibles,
   partidosDeFecha,
+  crearPartidoManual,
+  actualizarPartido,
+  borrarPartido,
   guardarPartidos,
 };

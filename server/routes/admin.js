@@ -4,7 +4,13 @@ const express = require('express');
 const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
 const { crearJugador, listarJugadores } = require('../services/jugadores');
-const { sincronizarDesdeApi, listarPartidos } = require('../services/fixture');
+const {
+  sincronizarDesdeApi,
+  listarPartidos,
+  crearPartidoManual,
+  actualizarPartido,
+  borrarPartido,
+} = require('../services/fixture');
 
 // Arma el enlace magico completo a partir del token. Usa el host de la peticion,
 // asi funciona igual en localhost y, mas adelante, en el dominio real.
@@ -88,6 +94,40 @@ router.get('/partidos', requiereAdmin, async (req, res) => {
     res.json(partidos);
   } catch (e) {
     res.status(500).json({ error: 'No se pudieron listar los partidos', detalle: e.message });
+  }
+});
+
+// POST /api/admin/partidos  ->  crea un partido manual.
+router.post('/partidos', requiereAdmin, async (req, res) => {
+  const { temporada, fecha_numero, local, visitante } = req.body || {};
+  if (!temporada || !fecha_numero || !local || !visitante) {
+    return res.status(400).json({ error: 'Faltan datos: temporada, fecha, local y visitante son obligatorios' });
+  }
+  try {
+    const partido = await crearPartidoManual(req.body);
+    res.status(201).json(partido);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo crear el partido', detalle: e.message });
+  }
+});
+
+// PUT /api/admin/partidos/:id  ->  edita un partido (resultado, estado, etc.).
+router.put('/partidos/:id', requiereAdmin, async (req, res) => {
+  try {
+    const partido = await actualizarPartido(req.params.id, req.body || {});
+    res.json(partido);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo actualizar el partido', detalle: e.message });
+  }
+});
+
+// DELETE /api/admin/partidos/:id  ->  borra un partido.
+router.delete('/partidos/:id', requiereAdmin, async (req, res) => {
+  try {
+    await borrarPartido(req.params.id);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo borrar el partido', detalle: e.message });
   }
 });
 
