@@ -23,10 +23,20 @@
     </section>
 
     <!-- Vista del panel (se muestra cuando SI estas logueado) -->
-    <section id="panel-view" class="tarjeta" style="display:none;">
-      <h1 class="titulo-chico">Bienvenido, admin</h1>
-      <p class="subtitulo">Sesión iniciada correctamente</p>
-      <p class="estado" style="color:#00e676;">Acá irá el panel de control (próximos módulos).</p>
+    <section id="panel-view" class="tarjeta tarjeta-ancha" style="display:none;">
+      <h1 class="titulo-chico">Panel de Administrador</h1>
+      <p class="subtitulo">Gestión de jugadores</p>
+
+      <h2 class="subtitulo-seccion">Crear jugador</h2>
+      <form id="form-jugador" class="formulario formulario-fila">
+        <input type="text" id="nombre-jugador" placeholder="Nombre del jugador" required />
+        <button type="submit">Crear y generar link</button>
+      </form>
+      <p class="error" id="error-jugador"></p>
+
+      <h2 class="subtitulo-seccion">Jugadores</h2>
+      <ul id="lista-jugadores" class="lista-jugadores"></ul>
+
       <button id="btn-logout" class="boton-secundario">Cerrar sesión</button>
     </section>
 

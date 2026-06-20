@@ -3,6 +3,13 @@
 const express = require('express');
 const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
+const { crearJugador, listarJugadores } = require('../services/jugadores');
+
+// Arma el enlace magico completo a partir del token. Usa el host de la peticion,
+// asi funciona igual en localhost y, mas adelante, en el dominio real.
+function construirEnlace(req, token) {
+  return `${req.protocol}://${req.get('host')}/entrar?token=${token}`;
+}
 
 // POST /api/admin/login  ->  recibe { usuario, password }, devuelve { token }
 router.post('/login', async (req, res) => {
@@ -30,6 +37,37 @@ router.get('/verificar', requiereAdmin, (req, res) => {
 router.post('/logout', requiereAdmin, (req, res) => {
   logout();
   res.json({ ok: true });
+});
+
+// POST /api/admin/jugadores  ->  crea un jugador y devuelve su enlace magico.
+router.post('/jugadores', requiereAdmin, async (req, res) => {
+  try {
+    const { nombre } = req.body || {};
+    const jugador = await crearJugador(nombre);
+    res.status(201).json({
+      jugador: { id: jugador.id, nombre: jugador.nombre, estado: jugador.estado },
+      enlace: construirEnlace(req, jugador.token_magico),
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo crear el jugador', detalle: e.message });
+  }
+});
+
+// GET /api/admin/jugadores  ->  lista los jugadores con su enlace magico.
+router.get('/jugadores', requiereAdmin, async (req, res) => {
+  try {
+    const jugadores = await listarJugadores();
+    const conEnlace = jugadores.map((j) => ({
+      id: j.id,
+      nombre: j.nombre,
+      estado: j.estado,
+      ultimo_acceso: j.ultimo_acceso,
+      enlace: construirEnlace(req, j.token_magico),
+    }));
+    res.json(conEnlace);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudieron listar los jugadores', detalle: e.message });
+  }
 });
 
 module.exports = router;

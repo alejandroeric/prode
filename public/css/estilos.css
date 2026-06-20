@@ -124,3 +124,93 @@ h1 {
   min-height: 1.2em;
   margin: 0;
 }
+
+/* ----- Panel de admin (gestion de jugadores) ----- */
+
+.tarjeta-ancha {
+  max-width: 560px;
+  text-align: left;
+}
+
+.tarjeta-ancha .titulo-chico,
+.tarjeta-ancha .subtitulo {
+  text-align: center;
+}
+
+.subtitulo-seccion {
+  font-size: 1.1rem;
+  color: #00e676;
+  margin: 2rem 0 0.8rem;
+  border-bottom: 1px solid #1f2a1f;
+  padding-bottom: 0.4rem;
+}
+
+.formulario-fila {
+  flex-direction: row;
+  margin-top: 0;
+}
+
+.formulario-fila input {
+  flex: 1;
+}
+
+.lista-jugadores {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.lista-jugadores .vacio {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.jugador {
+  background-color: #0a0f0a;
+  border: 1px solid #1f2a1f;
+  border-radius: 8px;
+  padding: 0.8rem;
+}
+
+.jugador-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.jugador-nombre {
+  font-weight: 700;
+}
+
+.jugador-estado {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.jugador-link {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.jugador-link input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #2a3a2a;
+  background-color: #111811;
+  color: #b0b0b0;
+  font-size: 0.8rem;
+}
+
+.jugador-link button {
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #00e676;
+  color: #0a0f0a;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
