@@ -498,3 +498,32 @@ h1 {
   font-size: 1rem;
   cursor: pointer;
 }
+
+.btn-ver-grupo {
+  margin-top: 0.6rem;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #2a3a2a;
+  background-color: transparent;
+  color: #6ea8ff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.grupo-pronosticos {
+  margin-top: 0.5rem;
+}
+
+.grupo-fila {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+  border-top: 1px solid #1f2a1f;
+}
+
+.grupo-gol {
+  font-weight: 700;
+  color: #00e676;
+}

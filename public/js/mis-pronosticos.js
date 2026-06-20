@@ -43,6 +43,8 @@ function tarjetaPartido(p) {
           <span class="badge estado-suspendido">Cerrado</span>
           <span class="partido-hora">${resultado} · ${miTexto}</span>
         </div>
+        <button type="button" class="btn-ver-grupo" data-partido="${p.id}">Ver pronósticos del grupo</button>
+        <div class="grupo-pronosticos" id="grupo-${p.id}"></div>
       </article>`;
   }
 
@@ -120,6 +122,40 @@ async function guardarTodo() {
 
   estadoGuardado.textContent = `Guardados: ${guardados}` + (fallidos ? ` · Fallaron: ${fallidos}` : ' ✅');
 }
+
+// Mostrar los pronosticos de todos para un partido ya arrancado.
+async function verPronosticosDelGrupo(partidoId, contenedorGrupo) {
+  contenedorGrupo.innerHTML = '<p class="texto-ayuda">Cargando...</p>';
+  try {
+    const res = await fetch('/api/pronosticos/partido/' + partidoId, { headers: cabeceraAuth });
+    const datos = await res.json();
+    if (!datos.revelado) {
+      contenedorGrupo.innerHTML = '<p class="texto-ayuda">Se revelan cuando arranca el partido.</p>';
+      return;
+    }
+    if (!datos.pronosticos.length) {
+      contenedorGrupo.innerHTML = '<p class="texto-ayuda">Nadie pronosticó este partido.</p>';
+      return;
+    }
+    contenedorGrupo.innerHTML = datos.pronosticos
+      .map((p) => `<div class="grupo-fila"><span>${p.avatar || ''} ${p.nombre}</span><span class="grupo-gol">${p.goles_local}-${p.goles_visitante}</span></div>`)
+      .join('');
+  } catch {
+    contenedorGrupo.innerHTML = '<p class="texto-ayuda">No se pudo cargar.</p>';
+  }
+}
+
+// Un solo listener para todos los botones "Ver pronosticos del grupo".
+contenedor.addEventListener('click', (e) => {
+  const boton = e.target.closest('.btn-ver-grupo');
+  if (!boton) return;
+  const grupo = document.getElementById('grupo-' + boton.dataset.partido);
+  if (grupo.innerHTML.trim() !== '') {
+    grupo.innerHTML = ''; // segundo clic: ocultar
+  } else {
+    verPronosticosDelGrupo(boton.dataset.partido, grupo);
+  }
+});
 
 function elegirTemporada(nombre) {
   temporadaActual = temporadas.find((t) => t.temporada === nombre);

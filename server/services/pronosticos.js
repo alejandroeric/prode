@@ -68,4 +68,30 @@ async function partidosConMiPronostico(jugadorId, temporada, fecha) {
   }));
 }
 
-module.exports = { guardarPronostico, partidosConMiPronostico, partidoBloqueado };
+// Devuelve los pronosticos de TODOS los jugadores para un partido,
+// pero SOLO si el partido ya arranco (antes son secretos).
+async function pronosticosDelPartido(partidoId) {
+  const { data: partido, error: e1 } = await supabase
+    .from('partidos').select('*').eq('id', partidoId).maybeSingle();
+  if (e1) throw new Error(e1.message);
+  if (!partido) return { error: 'partido_inexistente' };
+
+  // Si todavia no arranco, no se revela nada.
+  if (!partidoBloqueado(partido)) return { revelado: false };
+
+  const { data, error } = await supabase
+    .from('pronosticos')
+    .select('goles_local, goles_visitante, jugadores ( nombre, avatar )')
+    .eq('partido_id', partidoId);
+  if (error) throw new Error(error.message);
+
+  const pronosticos = data.map((p) => ({
+    nombre: p.jugadores ? p.jugadores.nombre : '(jugador)',
+    avatar: p.jugadores ? p.jugadores.avatar : '',
+    goles_local: p.goles_local,
+    goles_visitante: p.goles_visitante,
+  }));
+  return { revelado: true, pronosticos };
+}
+
+module.exports = { guardarPronostico, partidosConMiPronostico, pronosticosDelPartido, partidoBloqueado };

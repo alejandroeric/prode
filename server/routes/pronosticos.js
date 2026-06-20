@@ -4,7 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const { requiereJugador } = require('../middleware/sesionJugador');
-const { guardarPronostico, partidosConMiPronostico } = require('../services/pronosticos');
+const { guardarPronostico, partidosConMiPronostico, pronosticosDelPartido } = require('../services/pronosticos');
 
 // GET /api/pronosticos?temporada=2023&fecha=1
 // Devuelve los partidos de esa fecha con el pronostico propio y si estan bloqueados.
@@ -16,6 +16,19 @@ router.get('/', requiereJugador, async (req, res) => {
   try {
     const partidos = await partidosConMiPronostico(req.jugador.id, temporada, Number(fecha));
     res.json(partidos);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudieron obtener los pronosticos', detalle: e.message });
+  }
+});
+
+// GET /api/pronosticos/partido/:id  ->  pronosticos de TODOS (solo si el partido arranco).
+router.get('/partido/:id', requiereJugador, async (req, res) => {
+  try {
+    const resultado = await pronosticosDelPartido(req.params.id);
+    if (resultado.error === 'partido_inexistente') {
+      return res.status(404).json({ error: 'El partido no existe' });
+    }
+    res.json(resultado);
   } catch (e) {
     res.status(500).json({ error: 'No se pudieron obtener los pronosticos', detalle: e.message });
   }
