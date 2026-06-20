@@ -39,6 +39,9 @@ app.use('/api/fixture', require('./routes/fixture'));
 // Rutas de pronosticos del jugador bajo /api/pronosticos.
 app.use('/api/pronosticos', require('./routes/pronosticos'));
 
+// Tabla de posiciones del grupo del jugador bajo /api/tabla.
+app.use('/api/tabla', require('./routes/tabla'));
+
 app.listen(PORT, () => {
   console.log(`Servidor del Prode corriendo en http://localhost:${PORT}`);
 });

@@ -97,7 +97,7 @@ async function validarSesionJugador(sesionToken) {
 
   const { data, error } = await supabase
     .from('jugadores')
-    .select('id, nombre, avatar, estado')
+    .select('id, nombre, avatar, estado, grupo_id')
     .eq('sesion_token', sesionToken)
     .maybeSingle();
 
