@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
 const { crearJugador, listarJugadores } = require('../services/jugadores');
+const { sincronizarDesdeApi, listarPartidos } = require('../services/fixture');
 
 // Arma el enlace magico completo a partir del token. Usa el host de la peticion,
 // asi funciona igual en localhost y, mas adelante, en el dominio real.
@@ -67,6 +68,26 @@ router.get('/jugadores', requiereAdmin, async (req, res) => {
     res.json(conEnlace);
   } catch (e) {
     res.status(500).json({ error: 'No se pudieron listar los jugadores', detalle: e.message });
+  }
+});
+
+// POST /api/admin/fixture/sincronizar  ->  trae partidos de la API a la tabla.
+router.post('/fixture/sincronizar', requiereAdmin, async (req, res) => {
+  try {
+    const resultado = await sincronizarDesdeApi();
+    res.json(resultado);
+  } catch (e) {
+    res.status(502).json({ error: 'No se pudo sincronizar con la API', detalle: e.message });
+  }
+});
+
+// GET /api/admin/partidos  ->  lista los partidos guardados.
+router.get('/partidos', requiereAdmin, async (req, res) => {
+  try {
+    const partidos = await listarPartidos();
+    res.json(partidos);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudieron listar los partidos', detalle: e.message });
   }
 });
 

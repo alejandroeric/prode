@@ -17,6 +17,7 @@ function mostrarPanel() {
   loginView.style.display = 'none';
   panelView.style.display = 'block';
   cargarJugadores();
+  cargarConteoPartidos();
 }
 
 // Devuelve la cabecera de autorizacion con el token guardado.
@@ -167,6 +168,48 @@ formJugador.addEventListener('submit', async (evento) => {
     }
   } catch {
     errorJugador.textContent = 'No se pudo conectar con el servidor';
+  }
+});
+
+// ----- Fixture (sincronizar desde API) -----
+
+const btnSincronizar = document.getElementById('btn-sincronizar');
+const estadoFixture = document.getElementById('estado-fixture');
+const conteoPartidos = document.getElementById('conteo-partidos');
+
+// Muestra cuantos partidos hay cargados en la base.
+async function cargarConteoPartidos() {
+  try {
+    const res = await fetch('/api/admin/partidos', { headers: cabeceraAuth() });
+    if (!res.ok) return;
+    const partidos = await res.json();
+    conteoPartidos.textContent = 'Partidos cargados: ' + partidos.length;
+  } catch {
+    // si falla, dejamos el texto como esta
+  }
+}
+
+// Dispara la sincronizacion con la API.
+btnSincronizar.addEventListener('click', async () => {
+  estadoFixture.textContent = 'Sincronizando...';
+  btnSincronizar.disabled = true;
+  try {
+    const res = await fetch('/api/admin/fixture/sincronizar', {
+      method: 'POST',
+      headers: cabeceraAuth(),
+    });
+    const datos = await res.json();
+    if (res.ok) {
+      estadoFixture.textContent =
+        'Listo: ' + datos.guardados + ' partidos sincronizados desde la API.';
+      cargarConteoPartidos();
+    } else {
+      estadoFixture.textContent = datos.error || 'No se pudo sincronizar.';
+    }
+  } catch {
+    estadoFixture.textContent = 'No se pudo conectar con el servidor.';
+  } finally {
+    btnSincronizar.disabled = false;
   }
 });
 
