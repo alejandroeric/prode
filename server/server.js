@@ -14,6 +14,11 @@ app.use(express.json());
 // Sirve los archivos estaticos del frontend (HTML, CSS, JS) desde /public.
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// El enlace magico apunta a /entrar (sin .html), asi que servimos esa pagina.
+app.get('/entrar', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'entrar.html'));
+});
+
 // Ruta de prueba para confirmar que el backend responde.
 app.get('/api/ping', (req, res) => {
   res.json({ ok: true, mensaje: 'El servidor del Prode esta vivo' });
@@ -24,6 +29,9 @@ app.use('/api', require('./routes/futbol'));
 
 // Rutas del administrador (login, verificar sesion, logout) bajo /api/admin.
 app.use('/api/admin', require('./routes/admin'));
+
+// Rutas de los jugadores (entrar por enlace magico, verificar sesion) bajo /api.
+app.use('/api', require('./routes/jugador'));
 
 app.listen(PORT, () => {
   console.log(`Servidor del Prode corriendo en http://localhost:${PORT}`);

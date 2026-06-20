@@ -46,4 +46,69 @@ async function listarJugadores() {
   return data;
 }
 
-module.exports = { crearJugador, listarJugadores, DIAS_VALIDEZ };
+// Valida un token magico y, si esta todo bien, hace entrar al jugador:
+// crea una sesion nueva, registra el acceso y renueva el vencimiento del link.
+// Devuelve { error } si algo falla, o { sesion, jugador } si entra OK.
+async function validarYEntrar(token) {
+  if (!token) return { error: 'falta_token' };
+
+  const { data: jugador, error } = await supabase
+    .from('jugadores')
+    .select('*')
+    .eq('token_magico', token)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!jugador) return { error: 'invalido' };
+  if (jugador.estado !== 'activo') return { error: 'suspendido' };
+  if (jugador.token_expira && new Date(jugador.token_expira) < new Date()) {
+    return { error: 'vencido' };
+  }
+
+  // esNuevo = todavia no entro nunca (sirve para la pantalla de bienvenida).
+  const esNuevo = !jugador.ultimo_acceso;
+
+  // Nueva sesion: al pisar sesion_token, cualquier otro dispositivo queda afuera.
+  const sesion = crypto.randomBytes(32).toString('hex');
+
+  const { error: errUpd } = await supabase
+    .from('jugadores')
+    .update({
+      sesion_token: sesion,
+      ultimo_acceso: new Date().toISOString(),
+      token_expira: calcularExpiracion(), // renovacion automatica del enlace
+    })
+    .eq('id', jugador.id);
+
+  if (errUpd) throw new Error(errUpd.message);
+
+  return {
+    sesion,
+    jugador: { id: jugador.id, nombre: jugador.nombre, avatar: jugador.avatar, esNuevo },
+  };
+}
+
+// Dado un token de sesion, devuelve el jugador si la sesion es valida y activa.
+// Como sesion_token es unico por jugador y se pisa al reentrar, esto tambien
+// hace cumplir la regla de "un solo dispositivo activo".
+async function validarSesionJugador(sesionToken) {
+  if (!sesionToken) return null;
+
+  const { data, error } = await supabase
+    .from('jugadores')
+    .select('id, nombre, avatar, estado')
+    .eq('sesion_token', sesionToken)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data || data.estado !== 'activo') return null;
+  return data;
+}
+
+module.exports = {
+  crearJugador,
+  listarJugadores,
+  validarYEntrar,
+  validarSesionJugador,
+  DIAS_VALIDEZ,
+};
