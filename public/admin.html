@@ -27,9 +27,17 @@
       <h1 class="titulo-chico">Panel de Administrador</h1>
       <p class="subtitulo">Gestión de jugadores</p>
 
+      <h2 class="subtitulo-seccion">Grupos (ligas privadas)</h2>
+      <form id="form-grupo" class="formulario formulario-fila">
+        <input type="text" id="nombre-grupo" placeholder="Nombre del grupo (ej: Trabajo)" required />
+        <button type="submit">Crear grupo</button>
+      </form>
+      <ul id="lista-grupos" class="lista-grupos"></ul>
+
       <h2 class="subtitulo-seccion">Crear jugador</h2>
-      <form id="form-jugador" class="formulario formulario-fila">
+      <form id="form-jugador" class="formulario">
         <input type="text" id="nombre-jugador" placeholder="Nombre del jugador" required />
+        <select id="grupo-jugador" class="selector" required></select>
         <button type="submit">Crear y generar link</button>
       </form>
       <p class="error" id="error-jugador"></p>

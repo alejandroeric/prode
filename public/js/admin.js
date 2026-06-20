@@ -16,6 +16,7 @@ function mostrarLogin() {
 function mostrarPanel() {
   loginView.style.display = 'none';
   panelView.style.display = 'block';
+  cargarGrupos();
   cargarJugadores();
   cargarConteoPartidos();
 }
@@ -90,6 +91,50 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
   mostrarLogin();
 });
 
+// ----- Gestion de grupos -----
+
+const formGrupo = document.getElementById('form-grupo');
+const listaGrupos = document.getElementById('lista-grupos');
+const selectorGrupoJugador = document.getElementById('grupo-jugador');
+
+// Trae los grupos y llena la lista + el selector del formulario de jugador.
+async function cargarGrupos() {
+  try {
+    const res = await fetch('/api/admin/grupos', { headers: cabeceraAuth() });
+    if (!res.ok) return;
+    const grupos = await res.json();
+
+    listaGrupos.innerHTML = grupos.length
+      ? grupos.map((g) => `<li class="grupo-item">${g.nombre}</li>`).join('')
+      : '<li class="vacio">Todavía no hay grupos.</li>';
+
+    selectorGrupoJugador.innerHTML = grupos
+      .map((g) => `<option value="${g.id}">${g.nombre}</option>`)
+      .join('');
+  } catch {
+    // si falla, no actualizamos
+  }
+}
+
+// Crear un grupo nuevo.
+formGrupo.addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const nombre = document.getElementById('nombre-grupo').value;
+  try {
+    const res = await fetch('/api/admin/grupos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
+      body: JSON.stringify({ nombre }),
+    });
+    if (res.ok) {
+      document.getElementById('nombre-grupo').value = '';
+      cargarGrupos();
+    }
+  } catch {
+    // ignoramos
+  }
+});
+
 // ----- Gestion de jugadores -----
 
 const formJugador = document.getElementById('form-jugador');
@@ -123,10 +168,11 @@ function dibujarJugadores(jugadores) {
 
     const nombre = j.nombre || '(sin nombre)';
     const estado = j.ultimo_acceso ? 'ya entró' : 'no entró aún';
+    const grupo = j.grupo || 'sin grupo';
 
     li.innerHTML = `
       <div class="jugador-info">
-        <span class="jugador-nombre">${nombre}</span>
+        <span class="jugador-nombre">${nombre} <small class="jugador-grupo">· ${grupo}</small></span>
         <span class="jugador-estado">${estado}</span>
       </div>
       <div class="jugador-link">
@@ -152,12 +198,18 @@ formJugador.addEventListener('submit', async (evento) => {
   errorJugador.textContent = '';
 
   const nombre = document.getElementById('nombre-jugador').value;
+  const grupoId = selectorGrupoJugador.value;
+
+  if (!grupoId) {
+    errorJugador.textContent = 'Primero creá un grupo y elegilo.';
+    return;
+  }
 
   try {
     const res = await fetch('/api/admin/jugadores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
-      body: JSON.stringify({ nombre }),
+      body: JSON.stringify({ nombre, grupo_id: grupoId }),
     });
     if (res.ok) {
       document.getElementById('nombre-jugador').value = '';

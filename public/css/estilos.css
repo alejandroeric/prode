@@ -451,6 +451,36 @@ h1 {
 .editar-partido .btn-guardar { background-color: #00e676; color: #0a0f0a; }
 .editar-partido .btn-borrar { background-color: #3a1a1a; color: #ff6b6b; }
 
+/* ----- Grupos (panel admin) ----- */
+
+.lista-grupos {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.lista-grupos .grupo-item {
+  background-color: #14241a;
+  border: 1px solid #1f2a1f;
+  color: #00e676;
+  border-radius: 20px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.lista-grupos .vacio {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.jugador-grupo {
+  color: #6ea8ff;
+  font-weight: 400;
+}
+
 /* ----- Pantalla Mis Pronosticos ----- */
 
 .tarjeta-partido .equipo .gol-input {

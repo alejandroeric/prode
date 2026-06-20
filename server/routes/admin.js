@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
 const { crearJugador, listarJugadores } = require('../services/jugadores');
+const { crearGrupo, listarGrupos } = require('../services/grupos');
 const {
   sincronizarDesdeApi,
   listarPartidos,
@@ -47,11 +48,34 @@ router.post('/logout', requiereAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// POST /api/admin/jugadores  ->  crea un jugador y devuelve su enlace magico.
+// POST /api/admin/grupos  ->  crea un grupo (liga privada).
+router.post('/grupos', requiereAdmin, async (req, res) => {
+  const { nombre } = req.body || {};
+  if (!nombre || nombre.trim() === '') {
+    return res.status(400).json({ error: 'El nombre del grupo es obligatorio' });
+  }
+  try {
+    const grupo = await crearGrupo(nombre.trim());
+    res.status(201).json(grupo);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo crear el grupo', detalle: e.message });
+  }
+});
+
+// GET /api/admin/grupos  ->  lista los grupos.
+router.get('/grupos', requiereAdmin, async (req, res) => {
+  try {
+    res.json(await listarGrupos());
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudieron listar los grupos', detalle: e.message });
+  }
+});
+
+// POST /api/admin/jugadores  ->  crea un jugador (en un grupo) y devuelve su enlace magico.
 router.post('/jugadores', requiereAdmin, async (req, res) => {
   try {
-    const { nombre } = req.body || {};
-    const jugador = await crearJugador(nombre);
+    const { nombre, grupo_id } = req.body || {};
+    const jugador = await crearJugador(nombre, grupo_id);
     res.status(201).json({
       jugador: { id: jugador.id, nombre: jugador.nombre, estado: jugador.estado },
       enlace: construirEnlace(req, jugador.token_magico),
@@ -61,7 +85,7 @@ router.post('/jugadores', requiereAdmin, async (req, res) => {
   }
 });
 
-// GET /api/admin/jugadores  ->  lista los jugadores con su enlace magico.
+// GET /api/admin/jugadores  ->  lista los jugadores con su enlace magico y su grupo.
 router.get('/jugadores', requiereAdmin, async (req, res) => {
   try {
     const jugadores = await listarJugadores();
@@ -70,6 +94,7 @@ router.get('/jugadores', requiereAdmin, async (req, res) => {
       nombre: j.nombre,
       estado: j.estado,
       ultimo_acceso: j.ultimo_acceso,
+      grupo: j.grupos ? j.grupos.nombre : null,
       enlace: construirEnlace(req, j.token_magico),
     }));
     res.json(conEnlace);

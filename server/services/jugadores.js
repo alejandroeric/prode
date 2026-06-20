@@ -19,27 +19,28 @@ function generarToken() {
   return crypto.randomBytes(24).toString('hex');
 }
 
-// Crea un jugador nuevo con su token magico y vencimiento. Devuelve la fila creada.
-async function crearJugador(nombre) {
+// Crea un jugador nuevo con su token magico, vencimiento y grupo. Devuelve la fila creada.
+async function crearJugador(nombre, grupoId) {
   const { data, error } = await supabase
     .from('jugadores')
     .insert({
       nombre: nombre || null,
+      grupo_id: grupoId || null,
       token_magico: generarToken(),
       token_expira: calcularExpiracion(),
     })
-    .select('id, nombre, token_magico, estado, creado_en')
+    .select('id, nombre, token_magico, estado, creado_en, grupo_id')
     .single();
 
   if (error) throw new Error(error.message);
   return data;
 }
 
-// Lista todos los jugadores, del mas viejo al mas nuevo.
+// Lista todos los jugadores (con el nombre de su grupo), del mas viejo al mas nuevo.
 async function listarJugadores() {
   const { data, error } = await supabase
     .from('jugadores')
-    .select('id, nombre, token_magico, estado, ultimo_acceso, creado_en')
+    .select('id, nombre, token_magico, estado, ultimo_acceso, creado_en, grupo_id, grupos ( nombre )')
     .order('creado_en', { ascending: true });
 
   if (error) throw new Error(error.message);
