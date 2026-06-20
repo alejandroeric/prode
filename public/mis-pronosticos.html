@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prode — Mis Pronósticos</title>
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+  <header class="cabecera">
+    <h1 class="cabecera-titulo">MIS PRONÓSTICOS</h1>
+    <select id="selector-temporada" class="selector"></select>
+  </header>
+
+  <nav class="navegacion-fecha">
+    <button id="fecha-anterior" type="button">◀</button>
+    <span id="fecha-actual">Fecha —</span>
+    <button id="fecha-siguiente" type="button">▶</button>
+  </nav>
+
+  <main class="contenedor-partidos" id="partidos">
+    <p class="estado">Cargando...</p>
+  </main>
+
+  <div class="barra-guardar" id="barra-guardar" style="display:none;">
+    <span class="texto-ayuda" id="estado-guardado"></span>
+    <button id="btn-guardar-todo" type="button">Guardar mis pronósticos</button>
+  </div>
+
+  <script src="js/mis-pronosticos.js"></script>
+</body>
+</html>
