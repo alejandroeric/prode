@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prode — Administrador</title>
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+  <main class="pantalla-centrada">
+
+    <!-- Vista de login (se muestra cuando NO estas logueado) -->
+    <section id="login-view" class="tarjeta" style="display:none;">
+      <h1 class="titulo-chico">PRODE</h1>
+      <p class="subtitulo">Panel de Administrador</p>
+
+      <form id="form-login" class="formulario">
+        <input type="text" id="usuario" placeholder="Usuario" autocomplete="username" required />
+        <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password" required />
+        <button type="submit">Entrar</button>
+        <p class="error" id="error"></p>
+      </form>
+    </section>
+
+    <!-- Vista del panel (se muestra cuando SI estas logueado) -->
+    <section id="panel-view" class="tarjeta" style="display:none;">
+      <h1 class="titulo-chico">Bienvenido, admin</h1>
+      <p class="subtitulo">Sesión iniciada correctamente</p>
+      <p class="estado" style="color:#00e676;">Acá irá el panel de control (próximos módulos).</p>
+      <button id="btn-logout" class="boton-secundario">Cerrar sesión</button>
+    </section>
+
+  </main>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

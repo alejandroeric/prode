@@ -45,3 +45,82 @@ h1 {
   font-size: 0.95rem;
   color: #888;
 }
+
+/* ----- Pantalla de administrador (login) ----- */
+
+.pantalla-centrada {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.tarjeta {
+  background-color: #111811;
+  border: 1px solid #1f2a1f;
+  border-radius: 14px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.titulo-chico {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #00e676;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.formulario input {
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #2a3a2a;
+  background-color: #0a0f0a;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.formulario input:focus {
+  outline: none;
+  border-color: #00e676;
+}
+
+.formulario button,
+.boton-secundario {
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #00e676;
+  color: #0a0f0a;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.formulario button:hover,
+.boton-secundario:hover {
+  filter: brightness(1.1);
+}
+
+.boton-secundario {
+  margin-top: 2rem;
+  background-color: #2a3a2a;
+  color: #ffffff;
+}
+
+.error {
+  color: #ff1744;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+  margin: 0;
+}

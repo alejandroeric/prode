@@ -22,6 +22,9 @@ app.get('/api/ping', (req, res) => {
 // Rutas de futbol (datos de equipos, fixture, etc.) bajo el prefijo /api.
 app.use('/api', require('./routes/futbol'));
 
+// Rutas del administrador (login, verificar sesion, logout) bajo /api/admin.
+app.use('/api/admin', require('./routes/admin'));
+
 app.listen(PORT, () => {
   console.log(`Servidor del Prode corriendo en http://localhost:${PORT}`);
 });
