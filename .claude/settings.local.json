@@ -12,7 +12,8 @@
       "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; Write-Output \"node:\"; node --version; Write-Output \"npm:\"; npm --version)",
       "PowerShell($dirs = @\\(\"server\\\\routes\", \"server\\\\services\", \"public\\\\css\", \"public\\\\js\"\\); foreach \\($d in $dirs\\) { New-Item -ItemType Directory -Force -Path $d | Out-Null }; Write-Output \"Carpetas creadas:\"; Get-ChildItem -Recurse -Directory | Select-Object -ExpandProperty FullName)",
       "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; $job = Start-Job -ScriptBlock { Set-Location \"C:\\\\Users\\\\proyectos\\\\prode\"; $env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; node server/server.js }; Start-Sleep -Seconds 3; try { $ping = Invoke-RestMethod -Uri \"http://localhost:3000/api/ping\" -TimeoutSec 5; Write-Output \"RESPUESTA DEL SERVIDOR:\"; $ping | ConvertTo-Json; $home = Invoke-WebRequest -Uri \"http://localhost:3000/\" -TimeoutSec 5; Write-Output \"PAGINA PRINCIPAL: codigo HTTP $\\($home.StatusCode\\)\" } catch { Write-Output \"ERROR: $_\" } finally { Stop-Job $job; Remove-Job $job })",
-      "PowerShell(try { $r = Invoke-RestMethod -Uri \"https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=River%20Plate\" -TimeoutSec 15; $eq = $r.teams[0]; Write-Output \"Campos utiles del equipo:\"; $eq | Select-Object strTeam, strCountry, strLeague, strStadium, strBadge, strTeamBadge | Format-List } catch { Write-Output \"ERROR: $_\" })"
+      "PowerShell(try { $r = Invoke-RestMethod -Uri \"https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=River%20Plate\" -TimeoutSec 15; $eq = $r.teams[0]; Write-Output \"Campos utiles del equipo:\"; $eq | Select-Object strTeam, strCountry, strLeague, strStadium, strBadge, strTeamBadge | Format-List } catch { Write-Output \"ERROR: $_\" })",
+      "Bash(git check-ignore *)"
     ]
   }
 }
