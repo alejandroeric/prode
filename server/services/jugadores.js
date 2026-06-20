@@ -119,11 +119,36 @@ async function actualizarPerfil(id, nombre, avatar) {
   return data;
 }
 
+// Actualiza un jugador desde el panel admin: cambiar de grupo y/o suspender/reactivar.
+async function actualizarJugador(id, cambios) {
+  const permitidos = {};
+  if (cambios.grupo_id !== undefined) permitidos.grupo_id = cambios.grupo_id;
+  if (cambios.estado !== undefined) permitidos.estado = cambios.estado;
+
+  const { data, error } = await supabase
+    .from('jugadores')
+    .update(permitidos)
+    .eq('id', id)
+    .select('id, nombre, estado, grupo_id')
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// Borra un jugador (sus pronosticos se borran solos por el "on delete cascade").
+async function borrarJugador(id) {
+  const { error } = await supabase.from('jugadores').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
 module.exports = {
   crearJugador,
   listarJugadores,
   validarYEntrar,
   validarSesionJugador,
   actualizarPerfil,
+  actualizarJugador,
+  borrarJugador,
   DIAS_VALIDEZ,
 };

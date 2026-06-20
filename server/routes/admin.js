@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
-const { crearJugador, listarJugadores } = require('../services/jugadores');
+const { crearJugador, listarJugadores, actualizarJugador, borrarJugador } = require('../services/jugadores');
 const { crearGrupo, listarGrupos } = require('../services/grupos');
 const {
   sincronizarDesdeApi,
@@ -95,11 +95,32 @@ router.get('/jugadores', requiereAdmin, async (req, res) => {
       estado: j.estado,
       ultimo_acceso: j.ultimo_acceso,
       grupo: j.grupos ? j.grupos.nombre : null,
+      grupo_id: j.grupo_id,
       enlace: construirEnlace(req, j.token_magico),
     }));
     res.json(conEnlace);
   } catch (e) {
     res.status(500).json({ error: 'No se pudieron listar los jugadores', detalle: e.message });
+  }
+});
+
+// PUT /api/admin/jugadores/:id  ->  cambiar de grupo y/o suspender/reactivar.
+router.put('/jugadores/:id', requiereAdmin, async (req, res) => {
+  try {
+    const jugador = await actualizarJugador(req.params.id, req.body || {});
+    res.json(jugador);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo actualizar el jugador', detalle: e.message });
+  }
+});
+
+// DELETE /api/admin/jugadores/:id  ->  borra un jugador (y sus pronosticos).
+router.delete('/jugadores/:id', requiereAdmin, async (req, res) => {
+  try {
+    await borrarJugador(req.params.id);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo borrar el jugador', detalle: e.message });
   }
 });
 

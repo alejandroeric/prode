@@ -97,12 +97,15 @@ const formGrupo = document.getElementById('form-grupo');
 const listaGrupos = document.getElementById('lista-grupos');
 const selectorGrupoJugador = document.getElementById('grupo-jugador');
 
+let gruposCache = []; // guardamos los grupos para los selectores de "mover jugador"
+
 // Trae los grupos y llena la lista + el selector del formulario de jugador.
 async function cargarGrupos() {
   try {
     const res = await fetch('/api/admin/grupos', { headers: cabeceraAuth() });
     if (!res.ok) return;
     const grupos = await res.json();
+    gruposCache = grupos;
 
     listaGrupos.innerHTML = grupos.length
       ? grupos.map((g) => `<li class="grupo-item">${g.nombre}</li>`).join('')
@@ -167,8 +170,13 @@ function dibujarJugadores(jugadores) {
     li.className = 'jugador';
 
     const nombre = j.nombre || '(sin nombre)';
-    const estado = j.ultimo_acceso ? 'ya entró' : 'no entró aún';
+    const suspendido = j.estado === 'suspendido';
+    const estado = suspendido ? '⏸️ suspendido' : (j.ultimo_acceso ? 'ya entró' : 'no entró aún');
     const grupo = j.grupo || 'sin grupo';
+
+    const opcionesGrupo = gruposCache
+      .map((g) => `<option value="${g.id}" ${g.id === j.grupo_id ? 'selected' : ''}>${g.nombre}</option>`)
+      .join('');
 
     li.innerHTML = `
       <div class="jugador-info">
@@ -177,19 +185,52 @@ function dibujarJugadores(jugadores) {
       </div>
       <div class="jugador-link">
         <input type="text" readonly value="${j.enlace}" />
-        <button type="button">Copiar</button>
+        <button type="button" class="btn-copiar">Copiar</button>
+      </div>
+      <div class="jugador-controles">
+        <select class="sel-grupo">${opcionesGrupo}</select>
+        <button type="button" class="btn-suspender">${suspendido ? 'Reactivar' : 'Suspender'}</button>
+        <button type="button" class="btn-borrar-jug">Borrar</button>
       </div>
     `;
 
-    const boton = li.querySelector('button');
-    boton.addEventListener('click', async () => {
+    const btnCopiar = li.querySelector('.btn-copiar');
+    btnCopiar.addEventListener('click', async () => {
       await navigator.clipboard.writeText(j.enlace);
-      boton.textContent = '¡Copiado!';
-      setTimeout(() => { boton.textContent = 'Copiar'; }, 1500);
+      btnCopiar.textContent = '¡Copiado!';
+      setTimeout(() => { btnCopiar.textContent = 'Copiar'; }, 1500);
+    });
+
+    // Mover de grupo.
+    li.querySelector('.sel-grupo').addEventListener('change', async (e) => {
+      await actualizarJugador(j.id, { grupo_id: e.target.value });
+      cargarJugadores();
+    });
+
+    // Suspender / reactivar.
+    li.querySelector('.btn-suspender').addEventListener('click', async () => {
+      await actualizarJugador(j.id, { estado: suspendido ? 'activo' : 'suspendido' });
+      cargarJugadores();
+    });
+
+    // Borrar (con confirmacion).
+    li.querySelector('.btn-borrar-jug').addEventListener('click', async () => {
+      if (!confirm(`¿Borrar a ${nombre}? Se eliminan también sus pronósticos.`)) return;
+      await fetch(`/api/admin/jugadores/${j.id}`, { method: 'DELETE', headers: cabeceraAuth() });
+      cargarJugadores();
     });
 
     listaJugadores.appendChild(li);
   }
+}
+
+// Helper: PUT a un jugador (mover de grupo o cambiar estado).
+async function actualizarJugador(id, cambios) {
+  await fetch(`/api/admin/jugadores/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
+    body: JSON.stringify(cambios),
+  });
 }
 
 // Crear un jugador nuevo.
