@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { validarYEntrar, validarSesionJugador } = require('../services/jugadores');
+const { validarYEntrar, validarSesionJugador, actualizarPerfil } = require('../services/jugadores');
 
 // Mensajes claros para cada motivo de rechazo (los ve el jugador en pantalla).
 const MENSAJES = {
@@ -47,6 +47,22 @@ async function requiereJugador(req, res, next) {
 // GET /api/jugador/yo  ->  devuelve los datos del jugador logueado (prueba de sesion).
 router.get('/jugador/yo', requiereJugador, (req, res) => {
   res.json({ jugador: req.jugador });
+});
+
+// PUT /api/jugador/perfil  ->  guarda nombre y avatar (pantalla de bienvenida).
+router.put('/jugador/perfil', requiereJugador, async (req, res) => {
+  const { nombre, avatar } = req.body || {};
+
+  if (!nombre || nombre.trim() === '') {
+    return res.status(400).json({ error: 'El nombre es obligatorio.' });
+  }
+
+  try {
+    const jugador = await actualizarPerfil(req.jugador.id, nombre.trim(), avatar || null);
+    res.json({ jugador });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo guardar el perfil', detalle: e.message });
+  }
 });
 
 module.exports = router;

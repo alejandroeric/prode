@@ -11,7 +11,25 @@
     <section class="tarjeta">
       <h1 class="titulo-chico">PRODE</h1>
       <p class="subtitulo">Liga Profesional Argentina</p>
+
+      <!-- Mensaje de estado (validando / errores / hola de nuevo) -->
       <p class="estado" id="estado">Validando tu acceso...</p>
+
+      <!-- Bienvenida para jugadores nuevos (oculta hasta que haga falta) -->
+      <div id="bienvenida" style="display:none;">
+        <h2 class="subtitulo-seccion">¡Bienvenido al Prode!</h2>
+        <p class="texto-ayuda">Elegí tu nombre y un avatar para empezar.</p>
+
+        <form id="form-perfil" class="formulario">
+          <input type="text" id="nombre" placeholder="Tu nombre" maxlength="20" required />
+
+          <p class="texto-ayuda">Elegí tu avatar:</p>
+          <div class="avatares" id="avatares"></div>
+
+          <button type="submit">Empezar a jugar</button>
+          <p class="error" id="error-perfil"></p>
+        </form>
+      </div>
     </section>
   </main>
 

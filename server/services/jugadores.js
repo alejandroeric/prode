@@ -105,10 +105,24 @@ async function validarSesionJugador(sesionToken) {
   return data;
 }
 
+// Guarda el nombre y avatar elegidos por el jugador (pantalla de bienvenida).
+async function actualizarPerfil(id, nombre, avatar) {
+  const { data, error } = await supabase
+    .from('jugadores')
+    .update({ nombre, avatar })
+    .eq('id', id)
+    .select('id, nombre, avatar')
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 module.exports = {
   crearJugador,
   listarJugadores,
   validarYEntrar,
   validarSesionJugador,
+  actualizarPerfil,
   DIAS_VALIDEZ,
 };
