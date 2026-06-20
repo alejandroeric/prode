@@ -33,6 +33,9 @@ app.use('/api/admin', require('./routes/admin'));
 // Rutas de los jugadores (entrar por enlace magico, verificar sesion) bajo /api.
 app.use('/api', require('./routes/jugador'));
 
+// Rutas de lectura del fixture (partidos por fecha) bajo /api/fixture.
+app.use('/api/fixture', require('./routes/fixture'));
+
 app.listen(PORT, () => {
   console.log(`Servidor del Prode corriendo en http://localhost:${PORT}`);
 });

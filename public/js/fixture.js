@@ -1,0 +1,119 @@
+// fixture.js — Pantalla del fixture: muestra los partidos de cada fecha.
+
+const selectorTemporada = document.getElementById('selector-temporada');
+const fechaActualEl = document.getElementById('fecha-actual');
+const contenedor = document.getElementById('partidos');
+const btnAnterior = document.getElementById('fecha-anterior');
+const btnSiguiente = document.getElementById('fecha-siguiente');
+
+let temporadas = [];   // [{ temporada, fechas: [...] }]
+let temporadaActual = null;
+let indiceFecha = 0;   // posicion dentro del array de fechas de la temporada
+
+// Texto y color segun el estado del partido.
+const ESTADOS = {
+  proximo: { texto: 'Próximo', clase: 'estado-proximo' },
+  en_juego: { texto: 'EN JUEGO', clase: 'estado-jugando' },
+  finalizado: { texto: 'Finalizado', clase: 'estado-finalizado' },
+  suspendido: { texto: 'Suspendido', clase: 'estado-suspendido' },
+};
+
+// Formatea la fecha/hora de inicio a algo legible (dia y hora local).
+function formatearInicio(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleString('es-AR', {
+    weekday: 'short', day: '2-digit', month: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+// Dibuja una tarjeta de partido.
+function tarjetaPartido(p) {
+  const est = ESTADOS[p.estado] || ESTADOS.proximo;
+  const finalizado = p.estado === 'finalizado';
+  const golesL = p.goles_local != null ? p.goles_local : '';
+  const golesV = p.goles_visitante != null ? p.goles_visitante : '';
+  const escudo = (url) => url ? `<img src="${url}" alt="" class="escudo" />` : '<span class="escudo"></span>';
+
+  return `
+    <article class="tarjeta-partido">
+      <div class="equipo">
+        ${escudo(p.escudo_local)}
+        <span class="equipo-nombre">${p.local}</span>
+        <span class="gol">${golesL}</span>
+      </div>
+      <div class="equipo">
+        ${escudo(p.escudo_visitante)}
+        <span class="equipo-nombre">${p.visitante}</span>
+        <span class="gol">${golesV}</span>
+      </div>
+      <div class="partido-pie">
+        <span class="badge ${est.clase}">${est.texto}</span>
+        <span class="partido-hora">${finalizado ? (p.estadio || '') : formatearInicio(p.inicio)}</span>
+      </div>
+    </article>
+  `;
+}
+
+// Pide y dibuja los partidos de la fecha actual.
+async function cargarFecha() {
+  if (!temporadaActual) return;
+  const numeroFecha = temporadaActual.fechas[indiceFecha];
+  fechaActualEl.textContent = 'Fecha ' + numeroFecha;
+  contenedor.innerHTML = '<p class="estado">Cargando...</p>';
+
+  // Habilitar/deshabilitar flechas en los extremos.
+  btnAnterior.disabled = indiceFecha === 0;
+  btnSiguiente.disabled = indiceFecha === temporadaActual.fechas.length - 1;
+
+  try {
+    const res = await fetch(`/api/fixture?temporada=${temporadaActual.temporada}&fecha=${numeroFecha}`);
+    const partidos = await res.json();
+    if (!partidos.length) {
+      contenedor.innerHTML = '<p class="estado">No hay partidos en esta fecha.</p>';
+      return;
+    }
+    contenedor.innerHTML = partidos.map(tarjetaPartido).join('');
+  } catch {
+    contenedor.innerHTML = '<p class="estado">No se pudo cargar el fixture.</p>';
+  }
+}
+
+// Cambia la temporada elegida.
+function elegirTemporada(nombre) {
+  temporadaActual = temporadas.find((t) => t.temporada === nombre);
+  indiceFecha = 0;
+  cargarFecha();
+}
+
+btnAnterior.addEventListener('click', () => {
+  if (indiceFecha > 0) { indiceFecha--; cargarFecha(); }
+});
+btnSiguiente.addEventListener('click', () => {
+  if (indiceFecha < temporadaActual.fechas.length - 1) { indiceFecha++; cargarFecha(); }
+});
+selectorTemporada.addEventListener('change', (e) => elegirTemporada(e.target.value));
+
+// Arranque: traer temporadas disponibles.
+async function iniciar() {
+  try {
+    const res = await fetch('/api/fixture/temporadas');
+    temporadas = await res.json();
+    if (!temporadas.length) {
+      contenedor.innerHTML = '<p class="estado">Todavía no hay partidos cargados.</p>';
+      return;
+    }
+    selectorTemporada.innerHTML = temporadas
+      .map((t) => `<option value="${t.temporada}">Temporada ${t.temporada}</option>`)
+      .join('');
+    // Arrancamos en la temporada con MAS fechas cargadas (la de datos mas completos).
+    const principal = temporadas.reduce((a, b) => (b.fechas.length > a.fechas.length ? b : a));
+    selectorTemporada.value = principal.temporada;
+    elegirTemporada(principal.temporada);
+  } catch {
+    contenedor.innerHTML = '<p class="estado">No se pudo conectar con el servidor.</p>';
+  }
+}
+
+iniciar();

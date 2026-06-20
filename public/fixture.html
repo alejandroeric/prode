@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prode — Fixture</title>
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+  <header class="cabecera">
+    <h1 class="cabecera-titulo">FIXTURE</h1>
+    <select id="selector-temporada" class="selector"></select>
+  </header>
+
+  <nav class="navegacion-fecha">
+    <button id="fecha-anterior" type="button">◀</button>
+    <span id="fecha-actual">Fecha —</span>
+    <button id="fecha-siguiente" type="button">▶</button>
+  </nav>
+
+  <main class="contenedor-partidos" id="partidos">
+    <p class="estado">Cargando fixture...</p>
+  </main>
+
+  <script src="js/fixture.js"></script>
+</body>
+</html>

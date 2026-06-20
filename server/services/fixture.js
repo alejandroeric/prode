@@ -71,10 +71,41 @@ async function listarPartidos() {
   return data;
 }
 
+// Devuelve las temporadas disponibles con sus numeros de fecha.
+// Ej: [{ temporada: '2023', fechas: [1,2,3,...] }]
+async function temporadasDisponibles() {
+  const { data, error } = await supabase.from('partidos').select('temporada, fecha_numero');
+  if (error) throw new Error(error.message);
+
+  const mapa = {};
+  for (const r of data) {
+    if (!r.temporada) continue;
+    if (!mapa[r.temporada]) mapa[r.temporada] = new Set();
+    if (r.fecha_numero != null) mapa[r.temporada].add(r.fecha_numero);
+  }
+  return Object.entries(mapa)
+    .map(([temporada, set]) => ({ temporada, fechas: [...set].sort((a, b) => a - b) }))
+    .sort((a, b) => b.temporada.localeCompare(a.temporada));
+}
+
+// Devuelve los partidos de una fecha concreta, ordenados por hora de inicio.
+async function partidosDeFecha(temporada, fecha) {
+  const { data, error } = await supabase
+    .from('partidos')
+    .select('*')
+    .eq('temporada', temporada)
+    .eq('fecha_numero', fecha)
+    .order('inicio', { ascending: true, nullsFirst: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 module.exports = {
   sincronizarDesdeApi,
   sincronizarFecha,
   importarTemporada,
   listarPartidos,
+  temporadasDisponibles,
+  partidosDeFecha,
   guardarPartidos,
 };

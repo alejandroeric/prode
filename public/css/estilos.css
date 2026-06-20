@@ -249,3 +249,134 @@ h1 {
   border-color: #00e676;
   background-color: #14241a;
 }
+
+/* ----- Pantalla de Fixture ----- */
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.2rem;
+  background-color: #0d140d;
+  border-bottom: 1px solid #1f2a1f;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.cabecera-titulo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #00e676;
+}
+
+.selector {
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #2a3a2a;
+  background-color: #0a0f0a;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.navegacion-fecha {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.navegacion-fecha span {
+  font-size: 1.1rem;
+  font-weight: 700;
+  min-width: 8rem;
+  text-align: center;
+}
+
+.navegacion-fecha button {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  border: 1px solid #2a3a2a;
+  background-color: #111811;
+  color: #00e676;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.navegacion-fecha button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.contenedor-partidos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0 1rem 2rem;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.tarjeta-partido {
+  background-color: #111811;
+  border: 1px solid #1f2a1f;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+}
+
+.equipo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.25rem 0;
+}
+
+.escudo {
+  width: 1.8rem;
+  height: 1.8rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.equipo-nombre {
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+.gol {
+  font-size: 1.3rem;
+  font-weight: 800;
+  min-width: 1.5rem;
+  text-align: right;
+}
+
+.partido-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #1f2a1f;
+}
+
+.partido-hora {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+}
+
+.estado-proximo { background-color: #1f2a3a; color: #6ea8ff; }
+.estado-jugando { background-color: #3a3413; color: #ffd54f; }
+.estado-finalizado { background-color: #14241a; color: #00e676; }
+.estado-suspendido { background-color: #2a2a2a; color: #aaa; }
