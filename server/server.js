@@ -8,6 +8,10 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// En produccion (Render) la app corre detras de un proxy que maneja el HTTPS.
+// Esto hace que los enlaces magicos se armen con https correctamente.
+app.set('trust proxy', true);
+
 // Permite leer datos en formato JSON en las peticiones (lo usaremos al crear la API).
 app.use(express.json());
 
