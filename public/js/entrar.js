@@ -25,6 +25,7 @@ function mostrarError(texto) {
 function mostrarOk(texto) {
   estado.textContent = texto;
   estado.style.color = '#00e676';
+  document.getElementById('ir-app').style.display = 'inline-block';
 }
 
 // Dibuja los botones de avatar y maneja la seleccion.

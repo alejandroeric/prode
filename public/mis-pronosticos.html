@@ -6,7 +6,7 @@
   <title>Prode — Mis Pronósticos</title>
   <link rel="stylesheet" href="css/estilos.css" />
 </head>
-<body>
+<body class="con-nav">
   <header class="cabecera">
     <h1 class="cabecera-titulo">MIS PRONÓSTICOS</h1>
     <select id="selector-temporada" class="selector"></select>
@@ -26,6 +26,12 @@
     <span class="texto-ayuda" id="estado-guardado"></span>
     <button id="btn-guardar-todo" type="button">Guardar mis pronósticos</button>
   </div>
+
+  <nav class="nav-inferior">
+    <a href="fixture.html" class="nav-item">📅<span>Fixture</span></a>
+    <a href="mis-pronosticos.html" class="nav-item activo">✏️<span>Pronósticos</span></a>
+    <a href="tabla.html" class="nav-item">🏆<span>Tabla</span></a>
+  </nav>
 
   <script src="js/mis-pronosticos.js"></script>
 </body>

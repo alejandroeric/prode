@@ -6,7 +6,7 @@
   <title>Prode — Fixture</title>
   <link rel="stylesheet" href="css/estilos.css" />
 </head>
-<body>
+<body class="con-nav">
   <header class="cabecera">
     <h1 class="cabecera-titulo">FIXTURE</h1>
     <select id="selector-temporada" class="selector"></select>
@@ -21,6 +21,12 @@
   <main class="contenedor-partidos" id="partidos">
     <p class="estado">Cargando fixture...</p>
   </main>
+
+  <nav class="nav-inferior">
+    <a href="fixture.html" class="nav-item activo">📅<span>Fixture</span></a>
+    <a href="mis-pronosticos.html" class="nav-item">✏️<span>Pronósticos</span></a>
+    <a href="tabla.html" class="nav-item">🏆<span>Tabla</span></a>
+  </nav>
 
   <script src="js/fixture.js"></script>
 </body>
