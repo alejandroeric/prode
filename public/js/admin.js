@@ -26,6 +26,11 @@ function cabeceraAuth() {
   return { Authorization: 'Bearer ' + localStorage.getItem(CLAVE_TOKEN) };
 }
 
+// Abre WhatsApp con un mensaje ya escrito (el admin elige el chat y envia).
+function enviarWhatsApp(texto) {
+  window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+}
+
 // Al cargar la pagina: si ya hay un token guardado y sigue siendo valido,
 // mostramos el panel directamente. Si no, mostramos el login.
 async function verificarSesion() {
@@ -108,7 +113,9 @@ async function cargarGrupos() {
     gruposCache = grupos;
 
     listaGrupos.innerHTML = grupos.length
-      ? grupos.map((g) => `<li class="grupo-item">${g.nombre}</li>`).join('')
+      ? grupos.map((g) => `<li class="grupo-item">${g.nombre}
+          <button type="button" class="btn-tabla-wsp" data-id="${g.id}" data-nombre="${g.nombre}" title="Compartir tabla">📲</button>
+        </li>`).join('')
       : '<li class="vacio">Todavía no hay grupos.</li>';
 
     selectorGrupoJugador.innerHTML = grupos
@@ -118,6 +125,29 @@ async function cargarGrupos() {
     // si falla, no actualizamos
   }
 }
+
+// Compartir la tabla de un grupo por WhatsApp.
+async function compartirTabla(grupoId, nombreGrupo) {
+  try {
+    const res = await fetch('/api/admin/grupos/' + grupoId + '/tabla', { headers: cabeceraAuth() });
+    const tabla = await res.json();
+    if (!tabla.length) {
+      enviarWhatsApp(`🏆 Tabla - ${nombreGrupo}\n(todavía sin puntos)`);
+      return;
+    }
+    const medallas = ['🥇', '🥈', '🥉'];
+    const lineas = tabla.map((t, i) => `${medallas[i] || t.posicion + 'º'} ${t.nombre} - ${t.puntos} pts`);
+    enviarWhatsApp(`🏆 Tabla - ${nombreGrupo}\n\n${lineas.join('\n')}`);
+  } catch {
+    alert('No se pudo obtener la tabla.');
+  }
+}
+
+// Un listener para los botones de compartir tabla.
+listaGrupos.addEventListener('click', (e) => {
+  const b = e.target.closest('.btn-tabla-wsp');
+  if (b) compartirTabla(b.dataset.id, b.dataset.nombre);
+});
 
 // Crear un grupo nuevo.
 formGrupo.addEventListener('submit', async (evento) => {
@@ -186,6 +216,7 @@ function dibujarJugadores(jugadores) {
       <div class="jugador-link">
         <input type="text" readonly value="${j.enlace}" />
         <button type="button" class="btn-copiar">Copiar</button>
+        <button type="button" class="btn-wsp" title="Invitar por WhatsApp">📲</button>
       </div>
       <div class="jugador-controles">
         <select class="sel-grupo">${opcionesGrupo}</select>
@@ -199,6 +230,12 @@ function dibujarJugadores(jugadores) {
       await navigator.clipboard.writeText(j.enlace);
       btnCopiar.textContent = '¡Copiado!';
       setTimeout(() => { btnCopiar.textContent = 'Copiar'; }, 1500);
+    });
+
+    // Invitar por WhatsApp (mensaje con el enlace magico).
+    li.querySelector('.btn-wsp').addEventListener('click', () => {
+      const msg = `¡Te sumo al Prode! ⚽\n${nombre}, entrá con tu enlace personal (no lo compartas):\n${j.enlace}`;
+      enviarWhatsApp(msg);
     });
 
     // Mover de grupo.
@@ -420,5 +457,10 @@ function dibujarAdminPartidos(partidos) {
 }
 
 document.getElementById('btn-ver-fecha').addEventListener('click', verPartidosDeFecha);
+
+// Recordatorio generico al grupo por WhatsApp.
+document.getElementById('btn-recordatorio').addEventListener('click', () => {
+  enviarWhatsApp('⏰ ¡Recordatorio del Prode!\nNo te olvides de cargar tus pronósticos de la próxima fecha antes de que empiecen los partidos. ⚽🔮');
+});
 
 verificarSesion();

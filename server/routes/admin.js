@@ -5,6 +5,7 @@ const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
 const { crearJugador, listarJugadores, actualizarJugador, borrarJugador } = require('../services/jugadores');
 const { crearGrupo, listarGrupos } = require('../services/grupos');
+const { tablaDeGrupo } = require('../services/puntuacion');
 const {
   sincronizarDesdeApi,
   listarPartidos,
@@ -68,6 +69,15 @@ router.get('/grupos', requiereAdmin, async (req, res) => {
     res.json(await listarGrupos());
   } catch (e) {
     res.status(500).json({ error: 'No se pudieron listar los grupos', detalle: e.message });
+  }
+});
+
+// GET /api/admin/grupos/:id/tabla  ->  tabla de posiciones de un grupo (para compartir).
+router.get('/grupos/:id/tabla', requiereAdmin, async (req, res) => {
+  try {
+    res.json(await tablaDeGrupo(req.params.id));
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo obtener la tabla', detalle: e.message });
   }
 });
 

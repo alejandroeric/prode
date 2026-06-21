@@ -726,6 +726,41 @@ body.con-nav {
   min-width: 5.5rem;
 }
 
+/* ----- Botones de WhatsApp (notificaciones) ----- */
+
+.btn-wsp {
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #25d366;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.lista-grupos .btn-tabla-wsp {
+  margin-left: 0.4rem;
+  border: none;
+  background-color: #25d366;
+  border-radius: 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  vertical-align: middle;
+}
+
+.boton-wsp {
+  width: 100%;
+  padding: 0.9rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #25d366;
+  color: #0a0f0a;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
 /* ----- Pantalla Mis Pronosticos ----- */
 
 .tarjeta-partido .equipo .gol-input {
