@@ -3,27 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prode — Tabla</title>
+  <title>Prode — Mi Perfil</title>
   <link rel="stylesheet" href="css/estilos.css" />
 </head>
 <body class="con-nav">
   <header class="cabecera">
-    <h1 class="cabecera-titulo">TABLA</h1>
+    <h1 class="cabecera-titulo">MI PERFIL</h1>
   </header>
 
   <main>
-    <div id="podio" class="podio"></div>
-    <ul id="lista-posiciones" class="lista-posiciones"></ul>
+    <div id="ficha" class="ficha"></div>
+    <h2 class="subtitulo-seccion historial-titulo" id="titulo-historial" style="display:none;">Historial por fecha</h2>
+    <ul id="historial" class="lista-posiciones"></ul>
     <p class="estado" id="estado"></p>
   </main>
 
   <nav class="nav-inferior">
     <a href="fixture.html" class="nav-item">📅<span>Fixture</span></a>
     <a href="mis-pronosticos.html" class="nav-item">✏️<span>Pronósticos</span></a>
-    <a href="tabla.html" class="nav-item activo">🏆<span>Tabla</span></a>
-    <a href="perfil.html" class="nav-item">👤<span>Perfil</span></a>
+    <a href="tabla.html" class="nav-item">🏆<span>Tabla</span></a>
+    <a href="perfil.html" class="nav-item activo">👤<span>Perfil</span></a>
   </nav>
 
-  <script src="js/tabla.js"></script>
+  <script src="js/perfil.js"></script>
 </body>
 </html>

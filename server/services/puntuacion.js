@@ -78,4 +78,42 @@ async function tablaDeGrupo(grupoId) {
   return lista;
 }
 
-module.exports = { puntosDe, tablaDeGrupo };
+// Arma la ficha personal de un jugador: sus stats/posicion (de la tabla del grupo)
+// + su historial de puntos fecha a fecha.
+async function perfilDeJugador(jugadorId, grupoId) {
+  // Posicion y stats acumuladas: las sacamos de la tabla del grupo.
+  let fila = null;
+  if (grupoId) {
+    const tabla = await tablaDeGrupo(grupoId);
+    fila = tabla.find((t) => t.id === jugadorId) || null;
+  }
+
+  // Historial: puntos por fecha (solo partidos finalizados).
+  const { data: prons, error } = await supabase
+    .from('pronosticos')
+    .select('goles_local, goles_visitante, partidos ( goles_local, goles_visitante, estado, temporada, fecha_numero )')
+    .eq('jugador_id', jugadorId);
+  if (error) throw new Error(error.message);
+
+  const porFecha = {};
+  for (const p of prons) {
+    const m = p.partidos;
+    if (!m || m.estado !== 'finalizado' || m.goles_local == null || m.goles_visitante == null) continue;
+
+    const clave = m.temporada + '#' + m.fecha_numero;
+    if (!porFecha[clave]) {
+      porFecha[clave] = { temporada: m.temporada, fecha: m.fecha_numero, puntos: 0, exactos: 0, jugados: 0 };
+    }
+    const pts = puntosDe(p, m);
+    porFecha[clave].puntos += pts;
+    porFecha[clave].jugados++;
+    if (pts === 6) porFecha[clave].exactos++;
+  }
+
+  const historial = Object.values(porFecha)
+    .sort((a, b) => a.temporada.localeCompare(b.temporada) || a.fecha - b.fecha);
+
+  return { jugador: fila, historial };
+}
+
+module.exports = { puntosDe, tablaDeGrupo, perfilDeJugador };

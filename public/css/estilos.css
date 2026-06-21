@@ -609,6 +609,69 @@ body.con-nav {
   color: #00e676;
 }
 
+/* ----- Ficha personal (Perfil) ----- */
+
+.ficha {
+  max-width: 480px;
+  margin: 1.5rem auto 0;
+  padding: 1.5rem;
+  text-align: center;
+  background-color: #111811;
+  border: 1px solid #1f2a1f;
+  border-radius: 14px;
+}
+
+.ficha-avatar {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.ficha-nombre {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-top: 0.5rem;
+}
+
+.ficha-puesto {
+  color: #00e676;
+  font-weight: 700;
+  margin-top: 0.3rem;
+}
+
+.ficha-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1.5rem;
+  border-top: 1px solid #1f2a1f;
+  padding-top: 1.2rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stat-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.stat-lbl {
+  font-size: 0.7rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.historial-titulo {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
 /* ----- Pantalla Mis Pronosticos ----- */
 
 .tarjeta-partido .equipo .gol-input {

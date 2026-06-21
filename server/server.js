@@ -42,6 +42,9 @@ app.use('/api/pronosticos', require('./routes/pronosticos'));
 // Tabla de posiciones del grupo del jugador bajo /api/tabla.
 app.use('/api/tabla', require('./routes/tabla'));
 
+// Ficha personal del jugador bajo /api/perfil.
+app.use('/api/perfil', require('./routes/perfil'));
+
 app.listen(PORT, () => {
   console.log(`Servidor del Prode corriendo en http://localhost:${PORT}`);
 });
