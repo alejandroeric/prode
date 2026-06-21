@@ -52,9 +52,50 @@ function tarjetaPartido(p) {
         <span class="badge ${est.clase}">${est.texto}</span>
         <span class="partido-hora">${finalizado ? (p.estadio || '') : formatearInicio(p.inicio)}</span>
       </div>
+      <button type="button" class="btn-datos" data-partido="${p.id}">📊 Datos</button>
+      <div class="datos-partido" id="datos-${p.id}"></div>
     </article>
   `;
 }
+
+// Dibuja el panel de datos (equipos + head-to-head).
+function dibujarDatos(s) {
+  const equipo = (e) => `
+    <div class="datos-equipo">
+      ${e.logo ? `<img src="${e.logo}" class="escudo" />` : '<span class="escudo"></span>'}
+      <div>
+        <strong>${e.nombre}</strong>
+        <small>${[e.estadio, e.ciudad, e.fundado ? 'desde ' + e.fundado : ''].filter(Boolean).join(' · ')}</small>
+      </div>
+    </div>`;
+
+  const h2h = s.h2h.length
+    ? s.h2h.map((h) => `
+        <div class="h2h-fila">
+          <span class="h2h-fecha">${h.fecha.slice(0, 10)}</span>
+          <span>${h.local} <b>${h.goles_local}-${h.goles_visitante}</b> ${h.visitante}</span>
+        </div>`).join('')
+    : '<p class="texto-ayuda">Sin enfrentamientos en el registro.</p>';
+
+  return `${equipo(s.local)}${equipo(s.visitante)}
+    <h4 class="h2h-titulo">Últimos enfrentamientos</h4>${h2h}`;
+}
+
+// Un solo listener para todos los botones "Datos".
+contenedor.addEventListener('click', async (e) => {
+  const boton = e.target.closest('.btn-datos');
+  if (!boton) return;
+  const panel = document.getElementById('datos-' + boton.dataset.partido);
+  if (panel.innerHTML.trim() !== '') { panel.innerHTML = ''; return; } // segundo clic: ocultar
+  panel.innerHTML = '<p class="texto-ayuda">Cargando datos...</p>';
+  try {
+    const res = await fetch('/api/fixture/' + boton.dataset.partido + '/stats');
+    const stats = await res.json();
+    panel.innerHTML = dibujarDatos(stats);
+  } catch {
+    panel.innerHTML = '<p class="texto-ayuda">No se pudieron cargar los datos.</p>';
+  }
+});
 
 // Pide y dibuja los partidos de la fecha actual.
 async function cargarFecha() {

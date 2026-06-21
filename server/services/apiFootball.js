@@ -7,6 +7,72 @@
 const BASE_URL = 'https://v3.football.api-sports.io';
 const LIGA_ARGENTINA = 128; // Liga Profesional Argentina en API-Football
 
+// Hace un pedido a API-Football con la clave del .env.
+async function pedir(path) {
+  const key = process.env.API_FOOTBALL_KEY;
+  if (!key) throw new Error('Falta API_FOOTBALL_KEY en el .env');
+  const res = await fetch(BASE_URL + path, { headers: { 'x-apisports-key': key } });
+  return res.json();
+}
+
+// Normaliza un texto: minusculas, sin acentos.
+function normalizar(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+function aTokens(s) {
+  return normalizar(s).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+}
+
+// Cache en memoria de los equipos de la liga (para resolver nombre -> id).
+let cacheEquipos = null;
+
+async function equiposLiga() {
+  if (cacheEquipos) return cacheEquipos;
+  const data = await pedir(`/teams?league=${LIGA_ARGENTINA}&season=2024`);
+  cacheEquipos = (data.response || []).map((t) => ({
+    id: t.team.id,
+    nombre: t.team.name,
+    logo: t.team.logo,
+    fundado: t.team.founded,
+    estadio: t.venue ? t.venue.name : null,
+    ciudad: t.venue ? t.venue.city : null,
+    n: normalizar(t.team.name),
+    toks: aTokens(t.team.name),
+  }));
+  return cacheEquipos;
+}
+
+// Resuelve un nombre de equipo (como lo guardamos) al equipo de API-Football.
+async function resolverEquipo(nombre) {
+  const lista = await equiposLiga();
+  const q = normalizar(nombre);
+  // 1) coincidencia exacta o por inclusion.
+  let m = lista.find((e) => e.n === q) || lista.find((e) => e.n.includes(q) || q.includes(e.n));
+  if (m) return m;
+  // 2) el que comparte mas palabras (>=3 letras) con el nombre buscado.
+  const qt = aTokens(nombre).filter((t) => t.length >= 3);
+  let mejor = null, mejorScore = 0;
+  for (const e of lista) {
+    const compartidas = qt.filter((t) => e.toks.includes(t)).length;
+    if (compartidas > mejorScore) { mejorScore = compartidas; mejor = e; }
+  }
+  return mejorScore > 0 ? mejor : null;
+}
+
+// Historial de enfrentamientos entre dos equipos (por id), ya jugados.
+async function headToHead(idA, idB) {
+  const data = await pedir(`/fixtures/headtohead?h2h=${idA}-${idB}`);
+  return (data.response || [])
+    .filter((f) => f.goals.home != null && f.goals.away != null)
+    .map((f) => ({
+      fecha: f.fixture.date,
+      local: f.teams.home.name,
+      visitante: f.teams.away.name,
+      goles_local: f.goals.home,
+      goles_visitante: f.goals.away,
+    }));
+}
+
 // Saca el numero de fecha de textos tipo "Regular Season - 5".
 function numeroDeFecha(round) {
   const m = (round || '').match(/(\d+)\s*$/);
@@ -55,4 +121,4 @@ async function obtenerTemporadaCompleta(temporada) {
   return (datos.response || []).map(normalizarPartido);
 }
 
-module.exports = { obtenerTemporadaCompleta, LIGA_ARGENTINA };
+module.exports = { obtenerTemporadaCompleta, resolverEquipo, headToHead, LIGA_ARGENTINA };
