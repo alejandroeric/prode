@@ -81,6 +81,8 @@ h1 {
 }
 
 .formulario input {
+  min-width: 0;
+  max-width: 100%;
   padding: 0.9rem 1rem;
   border-radius: 8px;
   border: 1px solid #2a3a2a;
@@ -244,6 +246,7 @@ h1 {
 
 .jugador-link input {
   flex: 1;
+  min-width: 0;
   padding: 0.5rem;
   border-radius: 6px;
   border: 1px solid #2a3a2a;
@@ -446,6 +449,7 @@ h1 {
 
 .fila-campos input {
   flex: 1;
+  min-width: 0; /* permite que el campo se achique y no desborde la pantalla */
   padding: 0.9rem 1rem;
   border-radius: 8px;
   border: 1px solid #2a3a2a;
@@ -465,8 +469,9 @@ h1 {
 }
 
 .fila-campos .campo-goles {
-  flex: 0 0 4rem;
+  flex: 0 0 3rem;
   text-align: center;
+  padding: 0.9rem 0.3rem;
 }
 
 .editar-partido {
