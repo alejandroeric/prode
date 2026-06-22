@@ -24,57 +24,90 @@
 
     <!-- Vista del panel (se muestra cuando SI estas logueado) -->
     <section id="panel-view" class="tarjeta tarjeta-ancha" style="display:none;">
-      <h1 class="titulo-chico">Panel de Administrador</h1>
-      <p class="subtitulo">Gestión de jugadores</p>
+      <h1 class="titulo-grande">PRODE</h1>
+      <p class="subtitulo">Panel de Administrador</p>
+      <p class="firma-header">by Eric Nofal</p>
 
-      <h2 class="subtitulo-seccion">Grupos (ligas privadas)</h2>
-      <form id="form-grupo" class="formulario formulario-fila">
-        <input type="text" id="nombre-grupo" placeholder="Nombre del grupo (ej: Trabajo)" required />
-        <button type="submit">Crear grupo</button>
-      </form>
-      <ul id="lista-grupos" class="lista-grupos"></ul>
+      <nav class="tabs-admin">
+        <button type="button" class="tab-admin" data-tab="jugadores">👥 Jugadores</button>
+        <button type="button" class="tab-admin" data-tab="fixture">⚽ Fixture</button>
+        <button type="button" class="tab-admin" data-tab="config">⚙️ Config</button>
+      </nav>
 
-      <h2 class="subtitulo-seccion">Crear jugador</h2>
-      <form id="form-jugador" class="formulario">
-        <input type="text" id="nombre-jugador" placeholder="Nombre del jugador" required />
-        <select id="grupo-jugador" class="selector" required></select>
-        <button type="submit">Crear y generar link</button>
-      </form>
-      <p class="error" id="error-jugador"></p>
+      <!-- PESTAÑA 1: JUGADORES -->
+      <div class="tab-panel" data-panel="jugadores" hidden>
+        <h2 class="subtitulo-seccion">Grupos (ligas privadas)</h2>
+        <form id="form-grupo" class="formulario formulario-fila">
+          <input type="text" id="nombre-grupo" placeholder="Nombre del grupo (ej: Trabajo)" required />
+          <button type="submit">Crear grupo</button>
+        </form>
+        <ul id="lista-grupos" class="lista-grupos"></ul>
 
-      <h2 class="subtitulo-seccion">Jugadores</h2>
-      <ul id="lista-jugadores" class="lista-jugadores"></ul>
+        <h2 class="subtitulo-seccion">Crear jugador</h2>
+        <form id="form-jugador" class="formulario">
+          <input type="text" id="nombre-jugador" placeholder="Nombre del jugador" required />
+          <select id="grupo-jugador" class="selector" required></select>
+          <button type="submit">Crear y generar link</button>
+        </form>
+        <p class="error" id="error-jugador"></p>
 
-      <h2 class="subtitulo-seccion">Fixture</h2>
-      <button id="btn-sincronizar" type="button">Sincronizar desde API</button>
-      <p class="texto-ayuda" id="estado-fixture"></p>
-      <p class="texto-ayuda" id="conteo-partidos">Partidos cargados: —</p>
-
-      <h3 class="subtitulo-mini">Cargar partido manual</h3>
-      <form id="form-partido" class="formulario">
-        <div class="fila-campos">
-          <input type="text" id="m-temporada" placeholder="Temporada (ej: 2026)" required />
-          <input type="number" id="m-fecha" placeholder="N° fecha" required />
-        </div>
-        <input type="text" id="m-local" placeholder="Equipo local" required />
-        <input type="text" id="m-visitante" placeholder="Equipo visitante" required />
-        <input type="datetime-local" id="m-inicio" />
-        <input type="text" id="m-estadio" placeholder="Estadio (opcional)" />
-        <button type="submit">Cargar partido</button>
-        <p class="error" id="error-partido"></p>
-      </form>
-
-      <h3 class="subtitulo-mini">Editar / borrar por fecha</h3>
-      <div class="fila-campos">
-        <input type="text" id="v-temporada" placeholder="Temporada" />
-        <input type="number" id="v-fecha" placeholder="N° fecha" />
-        <button type="button" id="btn-ver-fecha">Ver</button>
+        <h2 class="subtitulo-seccion">Jugadores</h2>
+        <ul id="lista-jugadores" class="lista-jugadores"></ul>
       </div>
-      <ul id="lista-admin-partidos" class="lista-jugadores"></ul>
 
-      <h2 class="subtitulo-seccion">Notificaciones</h2>
-      <button id="btn-recordatorio" type="button" class="boton-wsp">📲 Enviar recordatorio al grupo</button>
-      <p class="texto-ayuda">Abre WhatsApp con el mensaje listo; vos elegís el grupo y enviás.</p>
+      <!-- PESTAÑA 2: FIXTURE / CARGA DE PARTIDOS -->
+      <div class="tab-panel" data-panel="fixture" hidden>
+        <h2 class="subtitulo-seccion">Fixture</h2>
+        <button id="btn-sincronizar" type="button">Sincronizar desde API</button>
+        <p class="texto-ayuda" id="estado-fixture"></p>
+        <p class="texto-ayuda" id="conteo-partidos">Partidos cargados: —</p>
+
+        <h3 class="subtitulo-mini">Cargar partido manual</h3>
+        <form id="form-partido" class="formulario">
+          <div class="fila-campos">
+            <input type="text" id="m-temporada" placeholder="Temporada (ej: 2026)" required />
+            <input type="number" id="m-fecha" placeholder="N° fecha" required />
+          </div>
+          <div class="fila-campos">
+            <input type="text" id="m-local" placeholder="Equipo local" required />
+            <input type="number" id="m-goles-local" placeholder="⚽" min="0" class="campo-goles" />
+          </div>
+          <div class="fila-campos">
+            <input type="text" id="m-visitante" placeholder="Equipo visitante" required />
+            <input type="number" id="m-goles-visitante" placeholder="⚽" min="0" class="campo-goles" />
+          </div>
+          <input type="datetime-local" id="m-inicio" />
+          <input type="text" id="m-estadio" placeholder="Estadio (opcional)" />
+          <button type="submit">Cargar partido</button>
+          <p class="error" id="error-partido"></p>
+        </form>
+        <p class="texto-ayuda">Si cargás los goles, el partido queda como "finalizado" (con resultado). Si los dejás vacíos, queda como "próximo".</p>
+
+        <h3 class="subtitulo-mini">Editar / borrar por fecha</h3>
+        <div class="fila-campos">
+          <input type="text" id="v-temporada" placeholder="Temporada" />
+          <input type="number" id="v-fecha" placeholder="N° fecha" />
+          <button type="button" id="btn-ver-fecha">Ver</button>
+        </div>
+        <ul id="lista-admin-partidos" class="lista-jugadores"></ul>
+      </div>
+
+      <!-- PESTAÑA 3: CONFIGURACIÓN Y NOTIFICACIONES -->
+      <div class="tab-panel" data-panel="config" hidden>
+        <h2 class="subtitulo-seccion">Configuración del torneo</h2>
+        <form id="form-config" class="formulario">
+          <input type="text" id="cfg-premio" placeholder="Premio (ej: Asado para el ganador)" />
+          <input type="text" id="cfg-torneo" placeholder="Torneo activo (ej: Apertura 2026)" list="lista-temporadas" />
+          <datalist id="lista-temporadas"></datalist>
+          <button type="submit">Guardar configuración</button>
+          <p class="texto-ayuda" id="estado-config"></p>
+        </form>
+        <p class="texto-ayuda">El "torneo activo" define qué cuenta la tabla. Cambiarlo a uno nuevo = arrancar un torneo desde cero (el anterior queda guardado como historial). 🔄</p>
+
+        <h2 class="subtitulo-seccion">Notificaciones</h2>
+        <button id="btn-recordatorio" type="button" class="boton-wsp">📲 Enviar recordatorio al grupo</button>
+        <p class="texto-ayuda">Abre WhatsApp con el mensaje listo; vos elegís el grupo y enviás.</p>
+      </div>
 
       <button id="btn-logout" class="boton-secundario">Cerrar sesión</button>
     </section>

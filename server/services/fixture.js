@@ -88,6 +88,11 @@ async function crearPartidoManual(datos) {
     buscarEscudo(datos.visitante),
   ]);
 
+  // Si se cargan ambos goles, el partido entra como finalizado; si no, proximo.
+  const golesLocal = datos.goles_local === '' || datos.goles_local == null ? null : Number(datos.goles_local);
+  const golesVisitante = datos.goles_visitante === '' || datos.goles_visitante == null ? null : Number(datos.goles_visitante);
+  const estado = golesLocal != null && golesVisitante != null ? 'finalizado' : 'proximo';
+
   const { data, error } = await supabase
     .from('partidos')
     .insert({
@@ -99,7 +104,9 @@ async function crearPartidoManual(datos) {
       estadio: datos.estadio || null,
       escudo_local: escudoLocal,
       escudo_visitante: escudoVisitante,
-      estado: 'proximo',
+      goles_local: golesLocal,
+      goles_visitante: golesVisitante,
+      estado,
       origen: 'manual',
     })
     .select('*')

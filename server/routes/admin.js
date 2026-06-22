@@ -6,6 +6,7 @@ const { login, logout, requiereAdmin } = require('../services/adminAuth');
 const { crearJugador, listarJugadores, actualizarJugador, borrarJugador } = require('../services/jugadores');
 const { crearGrupo, listarGrupos } = require('../services/grupos');
 const { tablaDeGrupo } = require('../services/puntuacion');
+const { obtenerConfig, actualizarConfig } = require('../services/configuracion');
 const {
   sincronizarDesdeApi,
   listarPartidos,
@@ -199,6 +200,24 @@ router.delete('/partidos/:id', requiereAdmin, async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'No se pudo borrar el partido', detalle: e.message });
+  }
+});
+
+// GET /api/admin/config  ->  configuracion actual (premio + torneo activo).
+router.get('/config', requiereAdmin, async (req, res) => {
+  try {
+    res.json(await obtenerConfig());
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo obtener la configuracion', detalle: e.message });
+  }
+});
+
+// PUT /api/admin/config  ->  guarda premio y/o torneo activo.
+router.put('/config', requiereAdmin, async (req, res) => {
+  try {
+    res.json(await actualizarConfig(req.body || {}));
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo guardar la configuracion', detalle: e.message });
   }
 });
 

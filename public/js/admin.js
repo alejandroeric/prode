@@ -19,6 +19,7 @@ function mostrarPanel() {
   cargarGrupos();
   cargarJugadores();
   cargarConteoPartidos();
+  cargarConfig();
 }
 
 // Devuelve la cabecera de autorizacion con el token guardado.
@@ -186,7 +187,7 @@ async function cargarJugadores() {
   }
 }
 
-// Dibuja cada jugador con su enlace y un boton para copiarlo.
+// Dibuja los jugadores AGRUPADOS por grupo (cada grupo con sus jugadores).
 function dibujarJugadores(jugadores) {
   listaJugadores.innerHTML = '';
 
@@ -195,70 +196,101 @@ function dibujarJugadores(jugadores) {
     return;
   }
 
+  // Agrupar por nombre de grupo.
+  const porGrupo = {};
   for (const j of jugadores) {
-    const li = document.createElement('li');
-    li.className = 'jugador';
-
-    const nombre = j.nombre || '(sin nombre)';
-    const suspendido = j.estado === 'suspendido';
-    const estado = suspendido ? '⏸️ suspendido' : (j.ultimo_acceso ? 'ya entró' : 'no entró aún');
-    const grupo = j.grupo || 'sin grupo';
-
-    const opcionesGrupo = gruposCache
-      .map((g) => `<option value="${g.id}" ${g.id === j.grupo_id ? 'selected' : ''}>${g.nombre}</option>`)
-      .join('');
-
-    li.innerHTML = `
-      <div class="jugador-info">
-        <span class="jugador-nombre">${nombre} <small class="jugador-grupo">· ${grupo}</small></span>
-        <span class="jugador-estado">${estado}</span>
-      </div>
-      <div class="jugador-link">
-        <input type="text" readonly value="${j.enlace}" />
-        <button type="button" class="btn-copiar">Copiar</button>
-        <button type="button" class="btn-wsp" title="Invitar por WhatsApp">📲</button>
-      </div>
-      <div class="jugador-controles">
-        <select class="sel-grupo">${opcionesGrupo}</select>
-        <button type="button" class="btn-suspender">${suspendido ? 'Reactivar' : 'Suspender'}</button>
-        <button type="button" class="btn-borrar-jug">Borrar</button>
-      </div>
-    `;
-
-    const btnCopiar = li.querySelector('.btn-copiar');
-    btnCopiar.addEventListener('click', async () => {
-      await navigator.clipboard.writeText(j.enlace);
-      btnCopiar.textContent = '¡Copiado!';
-      setTimeout(() => { btnCopiar.textContent = 'Copiar'; }, 1500);
-    });
-
-    // Invitar por WhatsApp (mensaje con el enlace magico).
-    li.querySelector('.btn-wsp').addEventListener('click', () => {
-      const msg = `¡Te sumo al Prode! ⚽\n${nombre}, entrá con tu enlace personal (no lo compartas):\n${j.enlace}`;
-      enviarWhatsApp(msg);
-    });
-
-    // Mover de grupo.
-    li.querySelector('.sel-grupo').addEventListener('change', async (e) => {
-      await actualizarJugador(j.id, { grupo_id: e.target.value });
-      cargarJugadores();
-    });
-
-    // Suspender / reactivar.
-    li.querySelector('.btn-suspender').addEventListener('click', async () => {
-      await actualizarJugador(j.id, { estado: suspendido ? 'activo' : 'suspendido' });
-      cargarJugadores();
-    });
-
-    // Borrar (con confirmacion).
-    li.querySelector('.btn-borrar-jug').addEventListener('click', async () => {
-      if (!confirm(`¿Borrar a ${nombre}? Se eliminan también sus pronósticos.`)) return;
-      await fetch(`/api/admin/jugadores/${j.id}`, { method: 'DELETE', headers: cabeceraAuth() });
-      cargarJugadores();
-    });
-
-    listaJugadores.appendChild(li);
+    const g = j.grupo || 'Sin grupo';
+    (porGrupo[g] = porGrupo[g] || []).push(j);
   }
+
+  for (const grupoNombre of Object.keys(porGrupo).sort()) {
+    const bloque = document.createElement('li');
+    bloque.className = 'grupo-bloque';
+
+    // Botón-encabezado del grupo (se toca para abrir/cerrar).
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'grupo-toggle';
+    toggle.innerHTML = `<span class="flecha">▸</span> ${grupoNombre} (${porGrupo[grupoNombre].length})`;
+
+    // Contenedor de los jugadores del grupo (arranca contraído).
+    const cont = document.createElement('ul');
+    cont.className = 'grupo-jugadores';
+    cont.hidden = true;
+    for (const j of porGrupo[grupoNombre]) {
+      cont.appendChild(crearItemJugador(j));
+    }
+
+    toggle.addEventListener('click', () => {
+      cont.hidden = !cont.hidden;
+      toggle.querySelector('.flecha').textContent = cont.hidden ? '▸' : '▾';
+    });
+
+    bloque.appendChild(toggle);
+    bloque.appendChild(cont);
+    listaJugadores.appendChild(bloque);
+  }
+}
+
+// Crea el item (li) de un jugador con sus controles.
+function crearItemJugador(j) {
+  const li = document.createElement('li');
+  li.className = 'jugador';
+
+  const nombre = j.nombre || '(sin nombre)';
+  const suspendido = j.estado === 'suspendido';
+  const estado = suspendido ? '⏸️ suspendido' : (j.ultimo_acceso ? 'ya entró' : 'no entró aún');
+
+  const opcionesGrupo = gruposCache
+    .map((g) => `<option value="${g.id}" ${g.id === j.grupo_id ? 'selected' : ''}>${g.nombre}</option>`)
+    .join('');
+
+  li.innerHTML = `
+    <div class="jugador-info">
+      <span class="jugador-nombre">${nombre}</span>
+      <span class="jugador-estado">${estado}</span>
+    </div>
+    <div class="jugador-link">
+      <input type="text" readonly value="${j.enlace}" />
+      <button type="button" class="btn-copiar">Copiar</button>
+      <button type="button" class="btn-wsp" title="Invitar por WhatsApp">📲</button>
+    </div>
+    <div class="jugador-controles">
+      <select class="sel-grupo">${opcionesGrupo}</select>
+      <button type="button" class="btn-suspender">${suspendido ? 'Reactivar' : 'Suspender'}</button>
+      <button type="button" class="btn-borrar-jug">Borrar</button>
+    </div>
+  `;
+
+  const btnCopiar = li.querySelector('.btn-copiar');
+  btnCopiar.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(j.enlace);
+    btnCopiar.textContent = '¡Copiado!';
+    setTimeout(() => { btnCopiar.textContent = 'Copiar'; }, 1500);
+  });
+
+  li.querySelector('.btn-wsp').addEventListener('click', () => {
+    const msg = `¡Te sumo al Prode! ⚽\n${nombre}, entrá con tu enlace personal (no lo compartas):\n${j.enlace}`;
+    enviarWhatsApp(msg);
+  });
+
+  li.querySelector('.sel-grupo').addEventListener('change', async (e) => {
+    await actualizarJugador(j.id, { grupo_id: e.target.value });
+    cargarJugadores();
+  });
+
+  li.querySelector('.btn-suspender').addEventListener('click', async () => {
+    await actualizarJugador(j.id, { estado: suspendido ? 'activo' : 'suspendido' });
+    cargarJugadores();
+  });
+
+  li.querySelector('.btn-borrar-jug').addEventListener('click', async () => {
+    if (!confirm(`¿Borrar a ${nombre}? Se eliminan también sus pronósticos.`)) return;
+    await fetch(`/api/admin/jugadores/${j.id}`, { method: 'DELETE', headers: cabeceraAuth() });
+    cargarJugadores();
+  });
+
+  return li;
 }
 
 // Helper: PUT a un jugador (mover de grupo o cambiar estado).
@@ -363,6 +395,9 @@ formPartido.addEventListener('submit', async (evento) => {
     // datetime-local es hora local; lo pasamos a formato universal.
     inicio: inicioLocal ? new Date(inicioLocal).toISOString() : null,
     estadio: document.getElementById('m-estadio').value,
+    // Goles opcionales: si se cargan, el backend lo marca como finalizado.
+    goles_local: document.getElementById('m-goles-local').value,
+    goles_visitante: document.getElementById('m-goles-visitante').value,
   };
 
   try {
@@ -458,9 +493,71 @@ function dibujarAdminPartidos(partidos) {
 
 document.getElementById('btn-ver-fecha').addEventListener('click', verPartidosDeFecha);
 
+// ----- Configuracion del torneo (premio + torneo activo) -----
+
+const formConfig = document.getElementById('form-config');
+const estadoConfig = document.getElementById('estado-config');
+
+// Trae la configuracion actual y llena el formulario + el datalist de temporadas.
+async function cargarConfig() {
+  try {
+    const res = await fetch('/api/admin/config', { headers: cabeceraAuth() });
+    if (res.ok) {
+      const cfg = await res.json();
+      document.getElementById('cfg-premio').value = cfg.premio || '';
+      document.getElementById('cfg-torneo').value = cfg.temporada_activa || '';
+    }
+    // Sugerencias de temporadas existentes (para el datalist).
+    const resT = await fetch('/api/fixture/temporadas');
+    if (resT.ok) {
+      const temporadas = await resT.json();
+      document.getElementById('lista-temporadas').innerHTML =
+        temporadas.map((t) => `<option value="${t.temporada}"></option>`).join('');
+    }
+  } catch {
+    // si falla, dejamos los campos como esten
+  }
+}
+
+formConfig.addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+
+  // Confirmacion de seguridad (por si se toca sin querer).
+  const torneo = document.getElementById('cfg-torneo').value;
+  const aviso = `¿Guardar la configuración?\n\nTorneo activo: "${torneo}"\n\nSi cambiaste el torneo activo, la tabla pasará a mostrar ese torneo (el anterior queda guardado).`;
+  if (!confirm(aviso)) {
+    return;
+  }
+
+  estadoConfig.textContent = 'Guardando...';
+  try {
+    const res = await fetch('/api/admin/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
+      body: JSON.stringify({
+        premio: document.getElementById('cfg-premio').value,
+        temporada_activa: document.getElementById('cfg-torneo').value,
+      }),
+    });
+    estadoConfig.textContent = res.ok ? 'Guardado ✅' : 'No se pudo guardar';
+  } catch {
+    estadoConfig.textContent = 'No se pudo conectar con el servidor';
+  }
+});
+
 // Recordatorio generico al grupo por WhatsApp.
 document.getElementById('btn-recordatorio').addEventListener('click', () => {
   enviarWhatsApp('⏰ ¡Recordatorio del Prode!\nNo te olvides de cargar tus pronósticos de la próxima fecha antes de que empiecen los partidos. ⚽🔮');
+});
+
+// ----- Pestañas del panel de admin -----
+const tabsAdmin = document.querySelectorAll('.tab-admin');
+const panelesAdmin = document.querySelectorAll('.tab-panel');
+tabsAdmin.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    tabsAdmin.forEach((t) => t.classList.toggle('activo', t === tab));
+    panelesAdmin.forEach((p) => { p.hidden = p.dataset.panel !== tab.dataset.tab; });
+  });
 });
 
 verificarSesion();

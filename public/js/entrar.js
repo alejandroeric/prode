@@ -9,7 +9,7 @@ const formPerfil = document.getElementById('form-perfil');
 const errorPerfil = document.getElementById('error-perfil');
 
 const CLAVE_SESION = 'jugador_sesion';
-const AVATARES = ['🐺', '🦁', '🐯', '🦅', '⚽', '🔥', '👑', '🚀'];
+const AVATARES = ['🐺', '🦁', '🐯', '🦅', '⚽', '🔥', '👑', '🚀', '🐉', '⚡'];
 
 let avatarElegido = AVATARES[0];
 
