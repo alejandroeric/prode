@@ -4,11 +4,13 @@ const express = require('express');
 const router = express.Router();
 const { requiereJugador } = require('../middleware/sesionJugador');
 const { perfilDeJugador } = require('../services/puntuacion');
+const { obtenerConfig } = require('../services/configuracion');
 
-// GET /api/perfil  ->  stats/posicion + historial fecha a fecha del jugador.
+// GET /api/perfil  ->  stats/posicion (del torneo activo) + historial fecha a fecha.
 router.get('/', requiereJugador, async (req, res) => {
   try {
-    const perfil = await perfilDeJugador(req.jugador.id, req.jugador.grupo_id);
+    const config = await obtenerConfig();
+    const perfil = await perfilDeJugador(req.jugador.id, req.jugador.grupo_id, config.temporada_activa);
     // Datos basicos del jugador desde la sesion (por si no tiene fila en la tabla).
     perfil.basico = { nombre: req.jugador.nombre, avatar: req.jugador.avatar };
     res.json(perfil);

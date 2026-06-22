@@ -28,9 +28,17 @@ async function cargar() {
       estado.textContent = 'Tu sesión no es válida. Entrá de nuevo con tu enlace.';
       return;
     }
-    const { tabla } = await res.json();
+    const { tabla, premio, torneo } = await res.json();
+
+    // Banner con el torneo activo y el premio.
+    const info = document.getElementById('info-torneo');
+    const partes = [];
+    if (torneo) partes.push('🏆 ' + torneo);
+    if (premio) partes.push('Premio: ' + premio);
+    info.textContent = partes.join(' · ');
+
     if (!tabla || tabla.length === 0) {
-      estado.textContent = 'Todavía no hay puntos en tu grupo.';
+      estado.textContent = 'Todavía no hay puntos en este torneo.';
       return;
     }
 

@@ -20,8 +20,9 @@ function puntosDe(pron, partido) {
   return 0;
 }
 
-// Arma la tabla de posiciones acumulada de un grupo (solo cuentan partidos finalizados).
-async function tablaDeGrupo(grupoId) {
+// Arma la tabla de posiciones de un grupo (solo partidos finalizados).
+// Si se pasa "temporada", cuenta SOLO ese torneo (sino, todos).
+async function tablaDeGrupo(grupoId, temporada) {
   const { data: jugadores, error: e1 } = await supabase
     .from('jugadores').select('id, nombre, avatar')
     .eq('grupo_id', grupoId).eq('estado', 'activo');
@@ -32,7 +33,7 @@ async function tablaDeGrupo(grupoId) {
   if (ids.length) {
     const { data, error: e2 } = await supabase
       .from('pronosticos')
-      .select('jugador_id, goles_local, goles_visitante, partidos ( goles_local, goles_visitante, estado )')
+      .select('jugador_id, goles_local, goles_visitante, partidos ( goles_local, goles_visitante, estado, temporada )')
       .in('jugador_id', ids);
     if (e2) throw new Error(e2.message);
     prons = data;
@@ -48,6 +49,7 @@ async function tablaDeGrupo(grupoId) {
     const partido = p.partidos;
     if (!partido || partido.estado !== 'finalizado') continue;
     if (partido.goles_local == null || partido.goles_visitante == null) continue;
+    if (temporada && partido.temporada !== temporada) continue; // solo el torneo activo
 
     const s = stats[p.jugador_id];
     s.jugados++;
@@ -80,11 +82,11 @@ async function tablaDeGrupo(grupoId) {
 
 // Arma la ficha personal de un jugador: sus stats/posicion (de la tabla del grupo)
 // + su historial de puntos fecha a fecha.
-async function perfilDeJugador(jugadorId, grupoId) {
-  // Posicion y stats acumuladas: las sacamos de la tabla del grupo.
+async function perfilDeJugador(jugadorId, grupoId, temporada) {
+  // Posicion y stats del torneo activo: las sacamos de la tabla del grupo.
   let fila = null;
   if (grupoId) {
-    const tabla = await tablaDeGrupo(grupoId);
+    const tabla = await tablaDeGrupo(grupoId, temporada);
     fila = tabla.find((t) => t.id === jugadorId) || null;
   }
 
