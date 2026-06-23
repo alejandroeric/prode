@@ -130,9 +130,11 @@ async function cargarGrupos() {
     listaGrupos.innerHTML = grupos.length
       ? grupos.map((g) => `<li class="grupo-item">
           <span class="grupo-nombre">${g.nombre}</span>
-          <button type="button" class="btn-tabla-wsp" data-id="${g.id}" data-nombre="${g.nombre}" title="Compartir tabla">📲</button>
-          <button type="button" class="btn-editar-grupo" data-id="${g.id}" data-nombre="${g.nombre}" title="Renombrar">✏️</button>
-          <button type="button" class="btn-borrar-grupo" data-id="${g.id}" data-nombre="${g.nombre}" title="Borrar">🗑️</button>
+          <div class="grupo-acciones">
+            <button type="button" class="btn-tabla-wsp" data-id="${g.id}" data-nombre="${g.nombre}">📲 Tabla</button>
+            <button type="button" class="btn-editar-grupo" data-id="${g.id}" data-nombre="${g.nombre}">Editar</button>
+            <button type="button" class="btn-borrar-grupo" data-id="${g.id}" data-nombre="${g.nombre}">Borrar</button>
+          </div>
         </li>`).join('')
       : '<li class="vacio">Todavía no hay grupos.</li>';
 

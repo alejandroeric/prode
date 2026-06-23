@@ -138,7 +138,12 @@ async function verPronosticosDelGrupo(partidoId, contenedorGrupo) {
       return;
     }
     contenedorGrupo.innerHTML = datos.pronosticos
-      .map((p) => `<div class="grupo-fila"><span>${p.avatar || ''} ${p.nombre}</span><span class="grupo-gol">${p.goles_local}-${p.goles_visitante}</span></div>`)
+      .map((p) => {
+        const res = (p.goles_local != null && p.goles_visitante != null)
+          ? `${p.goles_local}-${p.goles_visitante}`
+          : '<span class="sin-datos">sin datos</span>';
+        return `<div class="grupo-fila"><span>${p.avatar || ''} ${p.nombre}</span><span class="grupo-gol">${res}</span></div>`;
+      })
       .join('');
   } catch {
     contenedorGrupo.innerHTML = '<p class="texto-ayuda">No se pudo cargar.</p>';
