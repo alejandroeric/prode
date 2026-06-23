@@ -10,6 +10,7 @@ const { obtenerConfig, actualizarConfig } = require('../services/configuracion')
 const {
   sincronizarDesdeApi,
   listarPartidos,
+  equiposCargados,
   crearPartidoManual,
   crearPartidosEnLote,
   actualizarPartido,
@@ -152,6 +153,15 @@ router.get('/partidos', requiereAdmin, async (req, res) => {
     res.json(partidos);
   } catch (e) {
     res.status(500).json({ error: 'No se pudieron listar los partidos', detalle: e.message });
+  }
+});
+
+// GET /api/admin/equipos  ->  nombres de equipos ya cargados (para el autocompletado).
+router.get('/equipos', requiereAdmin, async (req, res) => {
+  try {
+    res.json(await equiposCargados());
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudieron obtener los equipos', detalle: e.message });
   }
 });
 

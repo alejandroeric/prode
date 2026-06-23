@@ -65,17 +65,18 @@
         <h3 class="subtitulo-mini">Cargar partido manual</h3>
         <form id="form-partido" class="formulario">
           <div class="fila-campos">
-            <input type="text" id="m-temporada" placeholder="Temporada (ej: 2026)" required />
+            <input type="text" id="m-temporada" placeholder="Temporada (ej: 2026)" list="lista-temporadas" required />
             <input type="number" id="m-fecha" placeholder="N° fecha" required />
           </div>
           <div class="fila-campos">
-            <input type="text" id="m-local" placeholder="Equipo local" required />
+            <input type="text" id="m-local" placeholder="Equipo local" list="lista-equipos" required />
             <input type="number" id="m-goles-local" placeholder="⚽" min="0" class="campo-goles" />
           </div>
           <div class="fila-campos">
-            <input type="text" id="m-visitante" placeholder="Equipo visitante" required />
+            <input type="text" id="m-visitante" placeholder="Equipo visitante" list="lista-equipos" required />
             <input type="number" id="m-goles-visitante" placeholder="⚽" min="0" class="campo-goles" />
           </div>
+          <datalist id="lista-equipos"></datalist>
           <input type="datetime-local" id="m-inicio" />
           <input type="text" id="m-estadio" placeholder="Estadio (opcional)" />
           <button type="submit">Cargar partido</button>
@@ -85,7 +86,7 @@
 
         <h3 class="subtitulo-mini">Editar / borrar por fecha</h3>
         <div class="fila-campos">
-          <input type="text" id="v-temporada" placeholder="Temporada" />
+          <input type="text" id="v-temporada" placeholder="Temporada" list="lista-temporadas" />
           <input type="number" id="v-fecha" placeholder="N° fecha" />
           <button type="button" id="btn-ver-fecha">Ver</button>
         </div>

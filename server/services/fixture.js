@@ -71,6 +71,18 @@ async function listarPartidos() {
   return data;
 }
 
+// Devuelve la lista de equipos ya cargados (nombres unicos), para el autocompletado.
+async function equiposCargados() {
+  const { data, error } = await supabase.from('partidos').select('local, visitante');
+  if (error) throw new Error(error.message);
+  const set = new Set();
+  for (const p of data) {
+    if (p.local) set.add(p.local);
+    if (p.visitante) set.add(p.visitante);
+  }
+  return [...set].sort((a, b) => a.localeCompare(b));
+}
+
 // Busca el escudo de un equipo por su nombre (best-effort: null si no lo encuentra).
 async function buscarEscudo(nombre) {
   try {
@@ -209,6 +221,7 @@ module.exports = {
   listarPartidos,
   temporadasDisponibles,
   partidosDeFecha,
+  equiposCargados,
   crearPartidoManual,
   crearPartidosEnLote,
   actualizarPartido,

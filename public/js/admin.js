@@ -20,6 +20,20 @@ function mostrarPanel() {
   cargarJugadores();
   cargarConteoPartidos();
   cargarConfig();
+  cargarEquipos();
+}
+
+// Llena el autocompletado de equipos (los ya cargados en el fixture).
+async function cargarEquipos() {
+  try {
+    const res = await fetch('/api/admin/equipos', { headers: cabeceraAuth() });
+    if (!res.ok) return;
+    const equipos = await res.json();
+    document.getElementById('lista-equipos').innerHTML =
+      equipos.map((e) => `<option value="${e}"></option>`).join('');
+  } catch {
+    // si falla, el campo sigue siendo texto libre
+  }
 }
 
 // Devuelve la cabecera de autorizacion con el token guardado.
