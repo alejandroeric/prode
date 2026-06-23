@@ -52,10 +52,26 @@ function tarjetaPartido(p) {
         <span class="badge ${est.clase}">${est.texto}</span>
         <span class="partido-hora">${finalizado ? (p.estadio || '') : formatearInicio(p.inicio)}</span>
       </div>
-      <button type="button" class="btn-datos" data-partido="${p.id}">📊 Datos</button>
+      <div class="acciones-partido">
+        <button type="button" class="btn-datos" data-partido="${p.id}">📊 Datos</button>
+        <button type="button" class="btn-pronos" data-partido="${p.id}">🔮 Pronósticos</button>
+      </div>
       <div class="datos-partido" id="datos-${p.id}"></div>
+      <div class="datos-partido" id="pronos-${p.id}"></div>
     </article>
   `;
+}
+
+// Dibuja la lista de pronosticos del grupo (con "sin datos" para los que no cargaron).
+function dibujarPronosticos(lista) {
+  if (!lista.length) return '<p class="texto-ayuda">No hay jugadores en tu grupo.</p>';
+  const filas = lista.map((p) => {
+    const res = (p.goles_local != null && p.goles_visitante != null)
+      ? `${p.goles_local}-${p.goles_visitante}`
+      : '<span class="sin-datos">sin datos</span>';
+    return `<div class="grupo-fila"><span>${p.avatar || ''} ${p.nombre}</span><span class="grupo-gol">${res}</span></div>`;
+  }).join('');
+  return `<h4 class="h2h-titulo">Pronósticos del grupo</h4>${filas}`;
 }
 
 // Dibuja el panel de datos (equipos + head-to-head).
@@ -81,7 +97,7 @@ function dibujarDatos(s) {
     <h4 class="h2h-titulo">Últimos enfrentamientos</h4>${h2h}`;
 }
 
-// Un solo listener para todos los botones "Datos".
+// Listener para "Datos" (equipos + head-to-head).
 contenedor.addEventListener('click', async (e) => {
   const boton = e.target.closest('.btn-datos');
   if (!boton) return;
@@ -94,6 +110,38 @@ contenedor.addEventListener('click', async (e) => {
     panel.innerHTML = dibujarDatos(stats);
   } catch {
     panel.innerHTML = '<p class="texto-ayuda">No se pudieron cargar los datos.</p>';
+  }
+});
+
+// Listener para "Pronósticos del grupo" (solo si el partido ya arranco).
+contenedor.addEventListener('click', async (e) => {
+  const boton = e.target.closest('.btn-pronos');
+  if (!boton) return;
+  const panel = document.getElementById('pronos-' + boton.dataset.partido);
+  if (panel.innerHTML.trim() !== '') { panel.innerHTML = ''; return; }
+
+  const sesion = localStorage.getItem('jugador_sesion');
+  if (!sesion) {
+    panel.innerHTML = '<p class="texto-ayuda">Entrá con tu enlace mágico para ver los pronósticos del grupo.</p>';
+    return;
+  }
+  panel.innerHTML = '<p class="texto-ayuda">Cargando...</p>';
+  try {
+    const res = await fetch('/api/pronosticos/partido/' + boton.dataset.partido, {
+      headers: { Authorization: 'Bearer ' + sesion },
+    });
+    if (res.status === 401) {
+      panel.innerHTML = '<p class="texto-ayuda">Tu sesión no es válida. Entrá de nuevo con tu enlace.</p>';
+      return;
+    }
+    const datos = await res.json();
+    if (!datos.revelado) {
+      panel.innerHTML = '<p class="texto-ayuda">🔒 Se revelan cuando arranca el partido.</p>';
+      return;
+    }
+    panel.innerHTML = dibujarPronosticos(datos.pronosticos);
+  } catch {
+    panel.innerHTML = '<p class="texto-ayuda">No se pudieron cargar.</p>';
   }
 });
 

@@ -24,7 +24,7 @@ router.get('/', requiereJugador, async (req, res) => {
 // GET /api/pronosticos/partido/:id  ->  pronosticos de TODOS (solo si el partido arranco).
 router.get('/partido/:id', requiereJugador, async (req, res) => {
   try {
-    const resultado = await pronosticosDelPartido(req.params.id);
+    const resultado = await pronosticosDelPartido(req.params.id, req.jugador.grupo_id);
     if (resultado.error === 'partido_inexistente') {
       return res.status(404).json({ error: 'El partido no existe' });
     }

@@ -68,9 +68,10 @@ async function partidosConMiPronostico(jugadorId, temporada, fecha) {
   }));
 }
 
-// Devuelve los pronosticos de TODOS los jugadores para un partido,
+// Devuelve los pronosticos de TODOS los jugadores DEL GRUPO para un partido,
 // pero SOLO si el partido ya arranco (antes son secretos).
-async function pronosticosDelPartido(partidoId) {
+// Incluye a los que NO pronosticaron (con goles en null = "sin datos").
+async function pronosticosDelPartido(partidoId, grupoId) {
   const { data: partido, error: e1 } = await supabase
     .from('partidos').select('*').eq('id', partidoId).maybeSingle();
   if (e1) throw new Error(e1.message);
@@ -79,18 +80,37 @@ async function pronosticosDelPartido(partidoId) {
   // Si todavia no arranco, no se revela nada.
   if (!partidoBloqueado(partido)) return { revelado: false };
 
-  const { data, error } = await supabase
-    .from('pronosticos')
-    .select('goles_local, goles_visitante, jugadores ( nombre, avatar )')
-    .eq('partido_id', partidoId);
-  if (error) throw new Error(error.message);
+  // Todos los jugadores activos del grupo.
+  const { data: jugadores, error: e2 } = await supabase
+    .from('jugadores').select('id, nombre, avatar')
+    .eq('grupo_id', grupoId).eq('estado', 'activo')
+    .order('nombre', { ascending: true });
+  if (e2) throw new Error(e2.message);
 
-  const pronosticos = data.map((p) => ({
-    nombre: p.jugadores ? p.jugadores.nombre : '(jugador)',
-    avatar: p.jugadores ? p.jugadores.avatar : '',
-    goles_local: p.goles_local,
-    goles_visitante: p.goles_visitante,
-  }));
+  // Pronosticos de esos jugadores para este partido.
+  const ids = jugadores.map((j) => j.id);
+  let prons = [];
+  if (ids.length) {
+    const { data, error: e3 } = await supabase
+      .from('pronosticos')
+      .select('jugador_id, goles_local, goles_visitante')
+      .eq('partido_id', partidoId).in('jugador_id', ids);
+    if (e3) throw new Error(e3.message);
+    prons = data;
+  }
+  const porJugador = {};
+  prons.forEach((p) => { porJugador[p.jugador_id] = p; });
+
+  const pronosticos = jugadores.map((j) => {
+    const p = porJugador[j.id];
+    return {
+      nombre: j.nombre || '(jugador)',
+      avatar: j.avatar || '',
+      goles_local: p ? p.goles_local : null,
+      goles_visitante: p ? p.goles_visitante : null,
+    };
+  });
+
   return { revelado: true, pronosticos };
 }
 
