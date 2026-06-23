@@ -72,9 +72,22 @@ async function listarPartidos() {
 }
 
 // Devuelve la lista de equipos ya cargados (nombres unicos), para el autocompletado.
+// Por defecto muestra solo los del TORNEO ACTIVO (evita duplicados entre temporadas).
+// Si el torneo activo no tiene equipos cargados, muestra todos (fallback).
 async function equiposCargados() {
-  const { data, error } = await supabase.from('partidos').select('local, visitante');
+  const { obtenerConfig } = require('./configuracion');
+  const activa = (await obtenerConfig()).temporada_activa;
+
+  let consulta = supabase.from('partidos').select('local, visitante');
+  if (activa) consulta = consulta.eq('temporada', activa);
+  let { data, error } = await consulta;
   if (error) throw new Error(error.message);
+
+  if (activa && (!data || data.length === 0)) {
+    const r = await supabase.from('partidos').select('local, visitante');
+    data = r.data || [];
+  }
+
   const set = new Set();
   for (const p of data) {
     if (p.local) set.add(p.local);
