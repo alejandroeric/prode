@@ -128,8 +128,11 @@ async function cargarGrupos() {
     gruposCache = grupos;
 
     listaGrupos.innerHTML = grupos.length
-      ? grupos.map((g) => `<li class="grupo-item">${g.nombre}
+      ? grupos.map((g) => `<li class="grupo-item">
+          <span class="grupo-nombre">${g.nombre}</span>
           <button type="button" class="btn-tabla-wsp" data-id="${g.id}" data-nombre="${g.nombre}" title="Compartir tabla">📲</button>
+          <button type="button" class="btn-editar-grupo" data-id="${g.id}" data-nombre="${g.nombre}" title="Renombrar">✏️</button>
+          <button type="button" class="btn-borrar-grupo" data-id="${g.id}" data-nombre="${g.nombre}" title="Borrar">🗑️</button>
         </li>`).join('')
       : '<li class="vacio">Todavía no hay grupos.</li>';
 
@@ -158,10 +161,32 @@ async function compartirTabla(grupoId, nombreGrupo) {
   }
 }
 
-// Un listener para los botones de compartir tabla.
-listaGrupos.addEventListener('click', (e) => {
-  const b = e.target.closest('.btn-tabla-wsp');
-  if (b) compartirTabla(b.dataset.id, b.dataset.nombre);
+// Un listener para los botones de cada grupo (compartir / renombrar / borrar).
+listaGrupos.addEventListener('click', async (e) => {
+  const wsp = e.target.closest('.btn-tabla-wsp');
+  if (wsp) { compartirTabla(wsp.dataset.id, wsp.dataset.nombre); return; }
+
+  const editar = e.target.closest('.btn-editar-grupo');
+  if (editar) {
+    const nuevo = prompt('Nuevo nombre del grupo:', editar.dataset.nombre);
+    if (!nuevo || nuevo.trim() === '') return;
+    await fetch('/api/admin/grupos/' + editar.dataset.id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
+      body: JSON.stringify({ nombre: nuevo.trim() }),
+    });
+    cargarGrupos();
+    cargarJugadores(); // para refrescar el grupo mostrado en cada jugador
+    return;
+  }
+
+  const borrar = e.target.closest('.btn-borrar-grupo');
+  if (borrar) {
+    if (!confirm(`¿Borrar el grupo "${borrar.dataset.nombre}"?\nSus jugadores quedan "sin grupo" (no se borran).`)) return;
+    await fetch('/api/admin/grupos/' + borrar.dataset.id, { method: 'DELETE', headers: cabeceraAuth() });
+    cargarGrupos();
+    cargarJugadores();
+  }
 });
 
 // Crear un grupo nuevo.
@@ -512,21 +537,35 @@ document.getElementById('btn-ver-fecha').addEventListener('click', verPartidosDe
 const formConfig = document.getElementById('form-config');
 const estadoConfig = document.getElementById('estado-config');
 
-// Trae la configuracion actual y llena el formulario + el datalist de temporadas.
+// Trae la configuracion actual y llena: el formulario, el datalist y los
+// desplegables de temporada del Fixture (carga manual + editar por fecha).
 async function cargarConfig() {
   try {
+    let activa = '';
     const res = await fetch('/api/admin/config', { headers: cabeceraAuth() });
     if (res.ok) {
       const cfg = await res.json();
+      activa = cfg.temporada_activa || '';
       document.getElementById('cfg-premio').value = cfg.premio || '';
-      document.getElementById('cfg-torneo').value = cfg.temporada_activa || '';
+      document.getElementById('cfg-torneo').value = activa;
     }
-    // Sugerencias de temporadas existentes (para el datalist).
+
     const resT = await fetch('/api/fixture/temporadas');
     if (resT.ok) {
-      const temporadas = await resT.json();
+      const temporadas = (await resT.json()).map((t) => t.temporada);
+
+      // Datalist del torneo activo (en Config).
       document.getElementById('lista-temporadas').innerHTML =
-        temporadas.map((t) => `<option value="${t.temporada}"></option>`).join('');
+        temporadas.map((t) => `<option value="${t}"></option>`).join('');
+
+      // Desplegables de temporada en el Fixture.
+      const opciones = temporadas.map((t) => `<option value="${t}">${t}</option>`).join('');
+      const mTemp = document.getElementById('m-temporada');
+      const vTemp = document.getElementById('v-temporada');
+      mTemp.innerHTML = opciones;
+      vTemp.innerHTML = `<option value="">Elegí temporada…</option>` + opciones;
+      // En la carga manual, dejamos preseleccionado el torneo activo.
+      if (activa && temporadas.includes(activa)) mTemp.value = activa;
     }
   } catch {
     // si falla, dejamos los campos como esten

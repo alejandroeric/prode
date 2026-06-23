@@ -453,7 +453,8 @@ h1 {
   gap: 0.5rem;
 }
 
-.fila-campos input {
+.fila-campos input,
+.fila-campos select {
   flex: 1;
   min-width: 0; /* permite que el campo se achique y no desborde la pantalla */
   padding: 0.9rem 1rem;
@@ -528,13 +529,26 @@ h1 {
 }
 
 .lista-grupos .grupo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   background-color: #14241a;
   border: 1px solid #1f2a1f;
   color: #00e676;
   border-radius: 20px;
-  padding: 0.3rem 0.9rem;
+  padding: 0.3rem 0.7rem;
   font-size: 0.85rem;
   font-weight: 700;
+}
+
+.lista-grupos .btn-editar-grupo,
+.lista-grupos .btn-borrar-grupo {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.1rem;
+  line-height: 1;
 }
 
 .lista-grupos .vacio {

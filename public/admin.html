@@ -65,7 +65,7 @@
         <h3 class="subtitulo-mini">Cargar partido manual</h3>
         <form id="form-partido" class="formulario">
           <div class="fila-campos">
-            <input type="text" id="m-temporada" placeholder="Temporada (ej: 2026)" list="lista-temporadas" required />
+            <select id="m-temporada" required></select>
             <input type="number" id="m-fecha" placeholder="N° fecha" required />
           </div>
           <div class="fila-campos">
@@ -86,7 +86,7 @@
 
         <h3 class="subtitulo-mini">Editar / borrar por fecha</h3>
         <div class="fila-campos">
-          <input type="text" id="v-temporada" placeholder="Temporada" list="lista-temporadas" />
+          <select id="v-temporada"></select>
           <input type="number" id="v-fecha" placeholder="N° fecha" />
           <button type="button" id="btn-ver-fecha">Ver</button>
         </div>

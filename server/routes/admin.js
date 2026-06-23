@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
 const { crearJugador, listarJugadores, actualizarJugador, borrarJugador } = require('../services/jugadores');
-const { crearGrupo, listarGrupos } = require('../services/grupos');
+const { crearGrupo, listarGrupos, actualizarGrupo, borrarGrupo } = require('../services/grupos');
 const { tablaDeGrupo } = require('../services/puntuacion');
 const { obtenerConfig, actualizarConfig } = require('../services/configuracion');
 const {
@@ -80,6 +80,29 @@ router.get('/grupos/:id/tabla', requiereAdmin, async (req, res) => {
     res.json(await tablaDeGrupo(req.params.id));
   } catch (e) {
     res.status(500).json({ error: 'No se pudo obtener la tabla', detalle: e.message });
+  }
+});
+
+// PUT /api/admin/grupos/:id  ->  renombrar un grupo.
+router.put('/grupos/:id', requiereAdmin, async (req, res) => {
+  const { nombre } = req.body || {};
+  if (!nombre || nombre.trim() === '') {
+    return res.status(400).json({ error: 'El nombre del grupo es obligatorio' });
+  }
+  try {
+    res.json(await actualizarGrupo(req.params.id, nombre.trim()));
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo actualizar el grupo', detalle: e.message });
+  }
+});
+
+// DELETE /api/admin/grupos/:id  ->  borrar un grupo (sus jugadores quedan sin grupo).
+router.delete('/grupos/:id', requiereAdmin, async (req, res) => {
+  try {
+    await borrarGrupo(req.params.id);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo borrar el grupo', detalle: e.message });
   }
 });
 

@@ -14,4 +14,17 @@ async function listarGrupos() {
   return data;
 }
 
-module.exports = { crearGrupo, listarGrupos };
+// Cambia el nombre de un grupo.
+async function actualizarGrupo(id, nombre) {
+  const { data, error } = await supabase.from('grupos').update({ nombre }).eq('id', id).select('*').single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// Borra un grupo. Sus jugadores quedan "sin grupo" (FK on delete set null), no se borran.
+async function borrarGrupo(id) {
+  const { error } = await supabase.from('grupos').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+module.exports = { crearGrupo, listarGrupos, actualizarGrupo, borrarGrupo };
