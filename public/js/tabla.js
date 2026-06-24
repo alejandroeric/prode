@@ -12,7 +12,7 @@ function lugarPodio(t, clase, medalla) {
     <div class="podio-lugar ${clase}">
       <div class="podio-medalla">${medalla}</div>
       <div class="podio-avatar">${escaparHtml(t.avatar) || '👤'}</div>
-      <div class="podio-nombre">${escaparHtml(t.nombre)}</div>
+      <div class="podio-nombre">${escaparHtml(t.nombre)}${t.campeon ? ' ⭐' : ''}</div>
       <div class="podio-puntos">${t.puntos} pts</div>
     </div>`;
 }
@@ -28,7 +28,7 @@ async function cargar() {
       estado.textContent = 'Tu sesión no es válida. Entrá de nuevo con tu enlace.';
       return;
     }
-    const { tabla, premio, torneo } = await res.json();
+    const { tabla, premio, torneo, campeonAnterior } = await res.json();
 
     // Banner con el torneo activo y el premio.
     const info = document.getElementById('info-torneo');
@@ -36,6 +36,17 @@ async function cargar() {
     if (torneo) partes.push('🏆 ' + torneo);
     if (premio) partes.push('Premio: ' + premio);
     info.textContent = partes.join(' · ');
+
+    // Recordatorio del campeon anterior (podio del torneo pasado).
+    const campAnt = document.getElementById('campeon-anterior');
+    if (campeonAnterior && campeonAnterior.podio.length) {
+      const medallas = ['🥇', '🥈', '🥉'];
+      campAnt.innerHTML = `<div class="ca-titulo">⭐ Campeón anterior · ${escaparHtml(campeonAnterior.torneo)}</div>` +
+        campeonAnterior.podio.map((p, i) =>
+          `<div class="ca-fila"><span>${medallas[i] || ''} ${escaparHtml(p.avatar)} ${escaparHtml(p.nombre)}</span><span class="ca-pts">${p.puntos} pts</span></div>`).join('');
+    } else {
+      campAnt.innerHTML = '';
+    }
 
     if (!tabla || tabla.length === 0) {
       estado.textContent = 'Todavía no hay puntos en este torneo.';
@@ -52,7 +63,7 @@ async function cargar() {
     lista.innerHTML = tabla.map((t) => `
       <li class="fila-pos">
         <span class="pos-num">${t.posicion}º</span>
-        <span class="pos-nombre">${escaparHtml(t.avatar)} ${escaparHtml(t.nombre)}</span>
+        <span class="pos-nombre">${escaparHtml(t.avatar)} ${escaparHtml(t.nombre)}${t.campeon ? ' ⭐' : ''}</span>
         <span class="pos-stats">${t.exactos} exactos · ${t.efectividad}%</span>
         <span class="pos-puntos">${t.puntos}</span>
       </li>`).join('');

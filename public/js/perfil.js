@@ -24,7 +24,8 @@ async function cargar() {
 
     ficha.innerHTML = `
       <div class="ficha-avatar">${escaparHtml(avatar)}</div>
-      <div class="ficha-nombre">${escaparHtml(nombre)}</div>
+      <div class="ficha-nombre">${escaparHtml(nombre)}${data.campeon ? ' ⭐' : ''}</div>
+      ${data.campeon ? '<div class="ficha-campeon">⭐ Campeón del torneo anterior</div>' : ''}
       <div class="ficha-puesto">${j ? `${j.posicion}º en tu grupo · ${j.puntos} pts` : 'Sin puntos todavía'}</div>
       <div class="ficha-stats">
         <div class="stat"><span class="stat-num">${j ? j.exactos : 0}</span><span class="stat-lbl">exactos</span></div>

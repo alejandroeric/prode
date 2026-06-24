@@ -98,12 +98,19 @@ async function pronosticosDelPartido(partidoId, grupoId) {
     if (e3) throw new Error(e3.message);
     prons = data;
   }
-  return { revelado: true, pronosticos: combinarPronosticos(jugadores, prons) };
+  // Campeon del torneo anterior (para marcar la estrella).
+  const { obtenerConfig } = require('./configuracion');
+  const { campeonesDeGrupo } = require('./puntuacion');
+  const camp = await campeonesDeGrupo(grupoId, (await obtenerConfig()).temporada_anterior);
+  const idsCampeon = camp ? camp.campeonIds : [];
+
+  return { revelado: true, pronosticos: combinarPronosticos(jugadores, prons, idsCampeon) };
 }
 
 // Combina cada jugador con SU propio pronostico (busca por jugador_id, no por orden).
 // El que no pronostico queda con goles en null ("sin datos"). Funcion pura (testeable).
-function combinarPronosticos(jugadores, prons) {
+// campeonIds: ids de los campeones del torneo anterior (para la estrella).
+function combinarPronosticos(jugadores, prons, campeonIds = []) {
   const porJugador = {};
   (prons || []).forEach((p) => { porJugador[p.jugador_id] = p; });
 
@@ -114,6 +121,7 @@ function combinarPronosticos(jugadores, prons) {
       avatar: j.avatar || '',
       goles_local: p ? p.goles_local : null,
       goles_visitante: p ? p.goles_visitante : null,
+      campeon: campeonIds.includes(j.id),
     };
   });
 }

@@ -559,6 +559,7 @@ h1 {
 }
 
 .grupo-acciones .btn-tabla-wsp { background-color: #25d366; color: #0a0f0a; }
+.grupo-acciones .btn-campeon-wsp { background-color: #ffd700; color: #0a0f0a; }
 .grupo-acciones .btn-editar-grupo { background-color: #3a3413; color: #ffd54f; }
 .grupo-acciones .btn-borrar-grupo { background-color: #3a1a1a; color: #ff6b6b; }
 
@@ -708,6 +709,36 @@ h1 {
 .pos-nombre { flex: 1; font-weight: 700; }
 .pos-stats { font-size: 0.72rem; color: #888; }
 .pos-puntos { font-weight: 800; color: #00e676; min-width: 2.5rem; text-align: right; font-size: 1.1rem; }
+
+/* ----- Campeon anterior (recordatorio del podio pasado) ----- */
+.campeon-anterior:not(:empty) {
+  max-width: 480px;
+  margin: 0 auto 0.5rem;
+  padding: 0.8rem 1rem;
+  background-color: #1a1808;
+  border: 1px solid #3a3413;
+  border-radius: 12px;
+}
+.ca-titulo {
+  color: #ffd700;
+  font-weight: 800;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+.ca-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+}
+.ca-pts { color: #ffd54f; font-weight: 700; }
+
+.ficha-campeon {
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
 
 /* ----- Menu inferior fijo (navegacion de la app) ----- */
 

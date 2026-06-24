@@ -5,7 +5,7 @@ const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
 const { crearJugador, listarJugadores, actualizarJugador, borrarJugador } = require('../services/jugadores');
 const { crearGrupo, listarGrupos, actualizarGrupo, borrarGrupo } = require('../services/grupos');
-const { tablaDeGrupo } = require('../services/puntuacion');
+const { tablaDeGrupo, campeonesDeGrupo } = require('../services/puntuacion');
 const { obtenerConfig, actualizarConfig } = require('../services/configuracion');
 const {
   sincronizarDesdeApi,
@@ -100,6 +100,18 @@ router.get('/grupos/:id/tabla', requiereAdmin, async (req, res) => {
   }
 });
 
+// GET /api/admin/grupos/:id/campeon  ->  campeon(es) del torneo anterior de ese grupo.
+router.get('/grupos/:id/campeon', requiereAdmin, async (req, res) => {
+  try {
+    const anterior = (await obtenerConfig()).temporada_anterior;
+    const camp = await campeonesDeGrupo(req.params.id, anterior);
+    const campeones = camp ? camp.podio.filter((p) => p.posicion === 1).map((p) => p.nombre) : [];
+    res.json({ campeones, torneo: anterior || null });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo obtener el campeon' });
+  }
+});
+
 // PUT /api/admin/grupos/:id  ->  renombrar un grupo.
 router.put('/grupos/:id', requiereAdmin, async (req, res) => {
   const { nombre } = req.body || {};
@@ -141,6 +153,18 @@ router.post('/jugadores', requiereAdmin, async (req, res) => {
 router.get('/jugadores', requiereAdmin, async (req, res) => {
   try {
     const jugadores = await listarJugadores();
+
+    // Campeones del torneo anterior (uno por grupo) -> set de ids para la estrella.
+    const anterior = (await obtenerConfig()).temporada_anterior;
+    const idsCampeon = new Set();
+    if (anterior) {
+      const grupos = [...new Set(jugadores.map((j) => j.grupo_id).filter(Boolean))];
+      for (const gid of grupos) {
+        const camp = await campeonesDeGrupo(gid, anterior);
+        if (camp) camp.campeonIds.forEach((id) => idsCampeon.add(id));
+      }
+    }
+
     const conEnlace = jugadores.map((j) => ({
       id: j.id,
       nombre: j.nombre,
@@ -148,6 +172,7 @@ router.get('/jugadores', requiereAdmin, async (req, res) => {
       ultimo_acceso: j.ultimo_acceso,
       grupo: j.grupos ? j.grupos.nombre : null,
       grupo_id: j.grupo_id,
+      campeon: idsCampeon.has(j.id),
       enlace: construirEnlace(req, j.token_magico),
     }));
     res.json(conEnlace);

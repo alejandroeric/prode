@@ -60,10 +60,11 @@ alter table pronosticos enable row level security;
 
 -- Configuracion global del sistema (una sola fila): premio y torneo en curso.
 create table configuracion (
-  id               integer primary key default 1,
-  premio           text,
-  temporada_activa text,
-  actualizado_en   timestamptz not null default now()
+  id                 integer primary key default 1,
+  premio             text,
+  temporada_activa   text,
+  temporada_anterior text,   -- el torneo que se acaba de cerrar (para el campeon ⭐)
+  actualizado_en     timestamptz not null default now()
 );
 
 insert into configuracion (id) values (1);

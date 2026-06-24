@@ -10,9 +10,18 @@ async function obtenerConfig() {
 }
 
 async function actualizarConfig(cambios) {
+  const actual = await obtenerConfig();
   const permitidos = {};
   if (cambios.premio !== undefined) permitidos.premio = cambios.premio;
-  if (cambios.temporada_activa !== undefined) permitidos.temporada_activa = cambios.temporada_activa;
+
+  if (cambios.temporada_activa !== undefined) {
+    permitidos.temporada_activa = cambios.temporada_activa;
+    // Si cambia el torneo activo, el que estaba pasa a ser el "torneo anterior"
+    // (de ahi sale el campeon con la estrella en el torneo nuevo).
+    if (actual.temporada_activa && cambios.temporada_activa !== actual.temporada_activa) {
+      permitidos.temporada_anterior = actual.temporada_activa;
+    }
+  }
   permitidos.actualizado_en = new Date().toISOString();
 
   const { data, error } = await supabase

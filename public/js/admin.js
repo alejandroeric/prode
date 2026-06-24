@@ -132,6 +132,7 @@ async function cargarGrupos() {
           <span class="grupo-nombre">${escaparHtml(g.nombre)}</span>
           <div class="grupo-acciones">
             <button type="button" class="btn-tabla-wsp" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">📲 Tabla</button>
+            <button type="button" class="btn-campeon-wsp" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">🏆 Campeón</button>
             <button type="button" class="btn-editar-grupo" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">Editar</button>
             <button type="button" class="btn-borrar-grupo" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">Borrar</button>
           </div>
@@ -163,10 +164,30 @@ async function compartirTabla(grupoId, nombreGrupo) {
   }
 }
 
-// Un listener para los botones de cada grupo (compartir / renombrar / borrar).
+// Anunciar el campeon del torneo anterior por WhatsApp (mensaje listo).
+async function anunciarCampeon(grupoId) {
+  try {
+    const res = await fetch('/api/admin/grupos/' + grupoId + '/campeon', { headers: cabeceraAuth() });
+    const { campeones, torneo } = await res.json();
+    if (!campeones.length) {
+      alert('Todavía no hay campeón del torneo anterior en este grupo.');
+      return;
+    }
+    const quien = campeones.join(' y ');
+    const verbo = campeones.length > 1 ? 'salieron campeones' : 'salió campeón';
+    enviarWhatsApp(`🏆 ¡${quien} ${verbo} del ${torneo}! 🎉\nLTA, sigan participando 😎⚽`);
+  } catch {
+    alert('No se pudo obtener el campeón.');
+  }
+}
+
+// Un listener para los botones de cada grupo (compartir / campeon / renombrar / borrar).
 listaGrupos.addEventListener('click', async (e) => {
   const wsp = e.target.closest('.btn-tabla-wsp');
   if (wsp) { compartirTabla(wsp.dataset.id, wsp.dataset.nombre); return; }
+
+  const camp = e.target.closest('.btn-campeon-wsp');
+  if (camp) { anunciarCampeon(camp.dataset.id); return; }
 
   const editar = e.target.closest('.btn-editar-grupo');
   if (editar) {
@@ -288,7 +309,7 @@ function crearItemJugador(j) {
 
   li.innerHTML = `
     <div class="jugador-info">
-      <span class="jugador-nombre">${escaparHtml(nombre)}</span>
+      <span class="jugador-nombre">${escaparHtml(nombre)}${j.campeon ? ' ⭐' : ''}</span>
       <span class="jugador-estado">${estado}</span>
     </div>
     <div class="jugador-link">

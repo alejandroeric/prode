@@ -80,6 +80,20 @@ async function tablaDeGrupo(grupoId, temporada) {
   return lista;
 }
 
+// Podio (top 3) y id del/los campeon(es) de un torneo para un grupo.
+// Sirve para mostrar al "campeon anterior" con la estrella. Devuelve null si no hay datos.
+async function campeonesDeGrupo(grupoId, temporada) {
+  if (!grupoId || !temporada) return null;
+  const tabla = await tablaDeGrupo(grupoId, temporada);
+  if (!tabla.length || !tabla.some((t) => t.jugados > 0)) return null;
+
+  const campeonIds = tabla.filter((t) => t.posicion === 1).map((t) => t.id);
+  const podio = tabla.slice(0, 3).map((t) => ({
+    nombre: t.nombre, avatar: t.avatar, puntos: t.puntos, posicion: t.posicion,
+  }));
+  return { campeonIds, podio, torneo: temporada };
+}
+
 // Arma la ficha personal de un jugador: sus stats/posicion (de la tabla del grupo)
 // + su historial de puntos fecha a fecha.
 async function perfilDeJugador(jugadorId, grupoId, temporada) {
@@ -118,4 +132,4 @@ async function perfilDeJugador(jugadorId, grupoId, temporada) {
   return { jugador: fila, historial };
 }
 
-module.exports = { puntosDe, tablaDeGrupo, perfilDeJugador };
+module.exports = { puntosDe, tablaDeGrupo, perfilDeJugador, campeonesDeGrupo };

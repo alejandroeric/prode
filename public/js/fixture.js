@@ -69,7 +69,7 @@ function dibujarPronosticos(lista) {
     const res = (p.goles_local != null && p.goles_visitante != null)
       ? `${p.goles_local}-${p.goles_visitante}`
       : '<span class="sin-datos">sin datos</span>';
-    return `<div class="grupo-fila"><span>${escaparHtml(p.avatar)} ${escaparHtml(p.nombre)}</span><span class="grupo-gol">${res}</span></div>`;
+    return `<div class="grupo-fila"><span>${escaparHtml(p.avatar)} ${escaparHtml(p.nombre)}${p.campeon ? ' ⭐' : ''}</span><span class="grupo-gol">${res}</span></div>`;
   }).join('');
   return `<h4 class="h2h-titulo">Pronósticos del grupo</h4>${filas}`;
 }
