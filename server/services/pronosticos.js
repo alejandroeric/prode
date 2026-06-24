@@ -98,10 +98,16 @@ async function pronosticosDelPartido(partidoId, grupoId) {
     if (e3) throw new Error(e3.message);
     prons = data;
   }
-  const porJugador = {};
-  prons.forEach((p) => { porJugador[p.jugador_id] = p; });
+  return { revelado: true, pronosticos: combinarPronosticos(jugadores, prons) };
+}
 
-  const pronosticos = jugadores.map((j) => {
+// Combina cada jugador con SU propio pronostico (busca por jugador_id, no por orden).
+// El que no pronostico queda con goles en null ("sin datos"). Funcion pura (testeable).
+function combinarPronosticos(jugadores, prons) {
+  const porJugador = {};
+  (prons || []).forEach((p) => { porJugador[p.jugador_id] = p; });
+
+  return jugadores.map((j) => {
     const p = porJugador[j.id];
     return {
       nombre: j.nombre || '(jugador)',
@@ -110,8 +116,12 @@ async function pronosticosDelPartido(partidoId, grupoId) {
       goles_visitante: p ? p.goles_visitante : null,
     };
   });
-
-  return { revelado: true, pronosticos };
 }
 
-module.exports = { guardarPronostico, partidosConMiPronostico, pronosticosDelPartido, partidoBloqueado };
+module.exports = {
+  guardarPronostico,
+  partidosConMiPronostico,
+  pronosticosDelPartido,
+  combinarPronosticos,
+  partidoBloqueado,
+};
