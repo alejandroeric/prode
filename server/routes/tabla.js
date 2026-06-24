@@ -16,7 +16,7 @@ router.get('/', requiereJugador, async (req, res) => {
     const tabla = await tablaDeGrupo(req.jugador.grupo_id, config.temporada_activa);
     res.json({ tabla, premio: config.premio, torneo: config.temporada_activa });
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo armar la tabla', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo armar la tabla' });
   }
 });
 

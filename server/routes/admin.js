@@ -23,19 +23,36 @@ function construirEnlace(req, token) {
   return `${req.protocol}://${req.get('host')}/entrar?token=${token}`;
 }
 
+// --- Limite de intentos de login (anti fuerza bruta) ---
+// Maximo 5 intentos fallidos cada 15 minutos. En memoria (se reinicia con el server).
+const MAX_INTENTOS = 5;
+const VENTANA_MS = 15 * 60 * 1000;
+let intentosFallidos = [];
+
+function demasiadosIntentos() {
+  const ahora = Date.now();
+  intentosFallidos = intentosFallidos.filter((t) => ahora - t < VENTANA_MS);
+  return intentosFallidos.length >= MAX_INTENTOS;
+}
+
 // POST /api/admin/login  ->  recibe { usuario, password }, devuelve { token }
 router.post('/login', async (req, res) => {
-  const { usuario, password } = req.body || {};
+  if (demasiadosIntentos()) {
+    return res.status(429).json({ error: 'Demasiados intentos fallidos. Esperá unos minutos e intentá de nuevo.' });
+  }
 
+  const { usuario, password } = req.body || {};
   if (!usuario || !password) {
     return res.status(400).json({ error: 'Falta el usuario o la contrasena' });
   }
 
   const token = await login(usuario, password);
   if (!token) {
+    intentosFallidos.push(Date.now());
     return res.status(401).json({ error: 'Usuario o contrasena incorrectos' });
   }
 
+  intentosFallidos = []; // login exitoso: reseteamos el contador
   res.json({ token });
 });
 
@@ -61,7 +78,7 @@ router.post('/grupos', requiereAdmin, async (req, res) => {
     const grupo = await crearGrupo(nombre.trim());
     res.status(201).json(grupo);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo crear el grupo', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo crear el grupo' });
   }
 });
 
@@ -70,7 +87,7 @@ router.get('/grupos', requiereAdmin, async (req, res) => {
   try {
     res.json(await listarGrupos());
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron listar los grupos', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron listar los grupos' });
   }
 });
 
@@ -79,7 +96,7 @@ router.get('/grupos/:id/tabla', requiereAdmin, async (req, res) => {
   try {
     res.json(await tablaDeGrupo(req.params.id));
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo obtener la tabla', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo obtener la tabla' });
   }
 });
 
@@ -92,7 +109,7 @@ router.put('/grupos/:id', requiereAdmin, async (req, res) => {
   try {
     res.json(await actualizarGrupo(req.params.id, nombre.trim()));
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo actualizar el grupo', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo actualizar el grupo' });
   }
 });
 
@@ -102,7 +119,7 @@ router.delete('/grupos/:id', requiereAdmin, async (req, res) => {
     await borrarGrupo(req.params.id);
     res.json({ ok: true });
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo borrar el grupo', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo borrar el grupo' });
   }
 });
 
@@ -116,7 +133,7 @@ router.post('/jugadores', requiereAdmin, async (req, res) => {
       enlace: construirEnlace(req, jugador.token_magico),
     });
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo crear el jugador', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo crear el jugador' });
   }
 });
 
@@ -135,7 +152,7 @@ router.get('/jugadores', requiereAdmin, async (req, res) => {
     }));
     res.json(conEnlace);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron listar los jugadores', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron listar los jugadores' });
   }
 });
 
@@ -145,7 +162,7 @@ router.put('/jugadores/:id', requiereAdmin, async (req, res) => {
     const jugador = await actualizarJugador(req.params.id, req.body || {});
     res.json(jugador);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo actualizar el jugador', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo actualizar el jugador' });
   }
 });
 
@@ -155,7 +172,7 @@ router.delete('/jugadores/:id', requiereAdmin, async (req, res) => {
     await borrarJugador(req.params.id);
     res.json({ ok: true });
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo borrar el jugador', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo borrar el jugador' });
   }
 });
 
@@ -165,7 +182,7 @@ router.post('/fixture/sincronizar', requiereAdmin, async (req, res) => {
     const resultado = await sincronizarDesdeApi();
     res.json(resultado);
   } catch (e) {
-    res.status(502).json({ error: 'No se pudo sincronizar con la API', detalle: e.message });
+    res.status(502).json({ error: 'No se pudo sincronizar con la API' });
   }
 });
 
@@ -175,7 +192,7 @@ router.get('/partidos', requiereAdmin, async (req, res) => {
     const partidos = await listarPartidos();
     res.json(partidos);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron listar los partidos', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron listar los partidos' });
   }
 });
 
@@ -184,7 +201,7 @@ router.get('/equipos', requiereAdmin, async (req, res) => {
   try {
     res.json(await equiposCargados());
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron obtener los equipos', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron obtener los equipos' });
   }
 });
 
@@ -198,7 +215,7 @@ router.post('/partidos', requiereAdmin, async (req, res) => {
     const partido = await crearPartidoManual(req.body);
     res.status(201).json(partido);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo crear el partido', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo crear el partido' });
   }
 });
 
@@ -212,7 +229,7 @@ router.post('/partidos/lote', requiereAdmin, async (req, res) => {
     const guardados = await crearPartidosEnLote(partidos, origen || 'captura');
     res.status(201).json({ guardados });
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron cargar los partidos', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron cargar los partidos' });
   }
 });
 
@@ -222,7 +239,7 @@ router.put('/partidos/:id', requiereAdmin, async (req, res) => {
     const partido = await actualizarPartido(req.params.id, req.body || {});
     res.json(partido);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo actualizar el partido', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo actualizar el partido' });
   }
 });
 
@@ -232,7 +249,7 @@ router.delete('/partidos/:id', requiereAdmin, async (req, res) => {
     await borrarPartido(req.params.id);
     res.json({ ok: true });
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo borrar el partido', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo borrar el partido' });
   }
 });
 
@@ -241,7 +258,7 @@ router.get('/config', requiereAdmin, async (req, res) => {
   try {
     res.json(await obtenerConfig());
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo obtener la configuracion', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo obtener la configuracion' });
   }
 });
 
@@ -250,7 +267,7 @@ router.put('/config', requiereAdmin, async (req, res) => {
   try {
     res.json(await actualizarConfig(req.body || {}));
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo guardar la configuracion', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo guardar la configuracion' });
   }
 });
 

@@ -24,7 +24,7 @@ router.post('/entrar', async (req, res) => {
     }
     res.json(resultado);
   } catch (e) {
-    res.status(500).json({ error: 'Error del servidor', detalle: e.message });
+    res.status(500).json({ error: 'Error del servidor' });
   }
 });
 
@@ -45,7 +45,7 @@ router.put('/jugador/perfil', requiereJugador, async (req, res) => {
     const jugador = await actualizarPerfil(req.jugador.id, nombre.trim(), avatar || null);
     res.json({ jugador });
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo guardar el perfil', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo guardar el perfil' });
   }
 });
 

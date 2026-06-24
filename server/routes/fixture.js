@@ -10,7 +10,7 @@ router.get('/temporadas', async (req, res) => {
   try {
     res.json(await temporadasDisponibles());
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron obtener las temporadas', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron obtener las temporadas' });
   }
 });
 
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
   try {
     res.json(await partidosDeFecha(temporada, Number(fecha)));
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron obtener los partidos', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron obtener los partidos' });
   }
 });
 
@@ -34,7 +34,7 @@ router.get('/:id/stats', async (req, res) => {
     if (!stats) return res.status(404).json({ error: 'El partido no existe' });
     res.json(stats);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron obtener las estadisticas', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron obtener las estadisticas' });
   }
 });
 

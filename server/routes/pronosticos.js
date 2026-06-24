@@ -17,7 +17,7 @@ router.get('/', requiereJugador, async (req, res) => {
     const partidos = await partidosConMiPronostico(req.jugador.id, temporada, Number(fecha));
     res.json(partidos);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron obtener los pronosticos', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron obtener los pronosticos' });
   }
 });
 
@@ -30,7 +30,7 @@ router.get('/partido/:id', requiereJugador, async (req, res) => {
     }
     res.json(resultado);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudieron obtener los pronosticos', detalle: e.message });
+    res.status(500).json({ error: 'No se pudieron obtener los pronosticos' });
   }
 });
 
@@ -55,7 +55,7 @@ router.post('/', requiereJugador, async (req, res) => {
     }
     res.json(resultado.pronostico);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo guardar el pronostico', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo guardar el pronostico' });
   }
 });
 

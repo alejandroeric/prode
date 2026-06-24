@@ -15,7 +15,7 @@ router.get('/', requiereJugador, async (req, res) => {
     perfil.basico = { nombre: req.jugador.nombre, avatar: req.jugador.avatar };
     res.json(perfil);
   } catch (e) {
-    res.status(500).json({ error: 'No se pudo obtener el perfil', detalle: e.message });
+    res.status(500).json({ error: 'No se pudo obtener el perfil' });
   }
 });
 
