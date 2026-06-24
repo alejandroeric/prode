@@ -40,12 +40,12 @@ function tarjetaPartido(p) {
     <article class="tarjeta-partido">
       <div class="equipo">
         ${escudo(p.escudo_local)}
-        <span class="equipo-nombre">${p.local}</span>
+        <span class="equipo-nombre">${escaparHtml(p.local)}</span>
         <span class="gol">${golesL}</span>
       </div>
       <div class="equipo">
         ${escudo(p.escudo_visitante)}
-        <span class="equipo-nombre">${p.visitante}</span>
+        <span class="equipo-nombre">${escaparHtml(p.visitante)}</span>
         <span class="gol">${golesV}</span>
       </div>
       <div class="partido-pie">
@@ -69,7 +69,7 @@ function dibujarPronosticos(lista) {
     const res = (p.goles_local != null && p.goles_visitante != null)
       ? `${p.goles_local}-${p.goles_visitante}`
       : '<span class="sin-datos">sin datos</span>';
-    return `<div class="grupo-fila"><span>${p.avatar || ''} ${p.nombre}</span><span class="grupo-gol">${res}</span></div>`;
+    return `<div class="grupo-fila"><span>${escaparHtml(p.avatar)} ${escaparHtml(p.nombre)}</span><span class="grupo-gol">${res}</span></div>`;
   }).join('');
   return `<h4 class="h2h-titulo">Pronósticos del grupo</h4>${filas}`;
 }
@@ -78,10 +78,10 @@ function dibujarPronosticos(lista) {
 function dibujarDatos(s) {
   const equipo = (e) => `
     <div class="datos-equipo">
-      ${e.logo ? `<img src="${e.logo}" class="escudo" />` : '<span class="escudo"></span>'}
+      ${e.logo ? `<img src="${escaparHtml(e.logo)}" class="escudo" />` : '<span class="escudo"></span>'}
       <div>
-        <strong>${e.nombre}</strong>
-        <small>${[e.estadio, e.ciudad, e.fundado ? 'desde ' + e.fundado : ''].filter(Boolean).join(' · ')}</small>
+        <strong>${escaparHtml(e.nombre)}</strong>
+        <small>${escaparHtml([e.estadio, e.ciudad, e.fundado ? 'desde ' + e.fundado : ''].filter(Boolean).join(' · '))}</small>
       </div>
     </div>`;
 
@@ -89,7 +89,7 @@ function dibujarDatos(s) {
     ? s.h2h.map((h) => `
         <div class="h2h-fila">
           <span class="h2h-fecha">${h.fecha.slice(0, 10)}</span>
-          <span>${h.local} <b>${h.goles_local}-${h.goles_visitante}</b> ${h.visitante}</span>
+          <span>${escaparHtml(h.local)} <b>${h.goles_local}-${h.goles_visitante}</b> ${escaparHtml(h.visitante)}</span>
         </div>`).join('')
     : '<p class="texto-ayuda">Sin enfrentamientos en el registro.</p>';
 

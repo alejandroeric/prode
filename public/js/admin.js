@@ -30,7 +30,7 @@ async function cargarEquipos() {
     if (!res.ok) return;
     const equipos = await res.json();
     document.getElementById('lista-equipos').innerHTML =
-      equipos.map((e) => `<option value="${e}"></option>`).join('');
+      equipos.map((e) => `<option value="${escaparHtml(e)}"></option>`).join('');
   } catch {
     // si falla, el campo sigue siendo texto libre
   }
@@ -129,17 +129,17 @@ async function cargarGrupos() {
 
     listaGrupos.innerHTML = grupos.length
       ? grupos.map((g) => `<li class="grupo-item">
-          <span class="grupo-nombre">${g.nombre}</span>
+          <span class="grupo-nombre">${escaparHtml(g.nombre)}</span>
           <div class="grupo-acciones">
-            <button type="button" class="btn-tabla-wsp" data-id="${g.id}" data-nombre="${g.nombre}">📲 Tabla</button>
-            <button type="button" class="btn-editar-grupo" data-id="${g.id}" data-nombre="${g.nombre}">Editar</button>
-            <button type="button" class="btn-borrar-grupo" data-id="${g.id}" data-nombre="${g.nombre}">Borrar</button>
+            <button type="button" class="btn-tabla-wsp" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">📲 Tabla</button>
+            <button type="button" class="btn-editar-grupo" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">Editar</button>
+            <button type="button" class="btn-borrar-grupo" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">Borrar</button>
           </div>
         </li>`).join('')
       : '<li class="vacio">Todavía no hay grupos.</li>';
 
     selectorGrupoJugador.innerHTML = grupos
-      .map((g) => `<option value="${g.id}">${g.nombre}</option>`)
+      .map((g) => `<option value="${g.id}">${escaparHtml(g.nombre)}</option>`)
       .join('');
   } catch {
     // si falla, no actualizamos
@@ -252,7 +252,7 @@ function dibujarJugadores(jugadores) {
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'grupo-toggle';
-    toggle.innerHTML = `<span class="flecha">▸</span> ${grupoNombre} (${porGrupo[grupoNombre].length})`;
+    toggle.innerHTML = `<span class="flecha">▸</span> ${escaparHtml(grupoNombre)} (${porGrupo[grupoNombre].length})`;
 
     // Contenedor de los jugadores del grupo (arranca contraído).
     const cont = document.createElement('ul');
@@ -288,7 +288,7 @@ function crearItemJugador(j) {
 
   li.innerHTML = `
     <div class="jugador-info">
-      <span class="jugador-nombre">${nombre}</span>
+      <span class="jugador-nombre">${escaparHtml(nombre)}</span>
       <span class="jugador-estado">${estado}</span>
     </div>
     <div class="jugador-link">
@@ -495,7 +495,7 @@ function dibujarAdminPartidos(partidos) {
 
     li.innerHTML = `
       <div class="jugador-info">
-        <span class="jugador-nombre">${p.local} vs ${p.visitante}</span>
+        <span class="jugador-nombre">${escaparHtml(p.local)} vs ${escaparHtml(p.visitante)}</span>
       </div>
       <div class="editar-partido">
         <input type="number" class="gol-input" value="${p.goles_local ?? ''}" placeholder="-" />
@@ -558,10 +558,10 @@ async function cargarConfig() {
 
       // Datalist del torneo activo (en Config).
       document.getElementById('lista-temporadas').innerHTML =
-        temporadas.map((t) => `<option value="${t}"></option>`).join('');
+        temporadas.map((t) => `<option value="${escaparHtml(t)}"></option>`).join('');
 
       // Desplegables de temporada en el Fixture.
-      const opciones = temporadas.map((t) => `<option value="${t}">${t}</option>`).join('');
+      const opciones = temporadas.map((t) => `<option value="${escaparHtml(t)}">${escaparHtml(t)}</option>`).join('');
       const mTemp = document.getElementById('m-temporada');
       const vTemp = document.getElementById('v-temporada');
       mTemp.innerHTML = opciones;

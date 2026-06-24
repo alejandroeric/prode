@@ -23,8 +23,8 @@ async function cargar() {
     const avatar = (j && j.avatar) || (data.basico && data.basico.avatar) || '👤';
 
     ficha.innerHTML = `
-      <div class="ficha-avatar">${avatar}</div>
-      <div class="ficha-nombre">${nombre}</div>
+      <div class="ficha-avatar">${escaparHtml(avatar)}</div>
+      <div class="ficha-nombre">${escaparHtml(nombre)}</div>
       <div class="ficha-puesto">${j ? `${j.posicion}º en tu grupo · ${j.puntos} pts` : 'Sin puntos todavía'}</div>
       <div class="ficha-stats">
         <div class="stat"><span class="stat-num">${j ? j.exactos : 0}</span><span class="stat-lbl">exactos</span></div>
@@ -37,7 +37,7 @@ async function cargar() {
       tituloHist.style.display = 'block';
       historialEl.innerHTML = data.historial.map((h) => `
         <li class="fila-pos">
-          <span class="pos-nombre">${h.temporada} · Fecha ${h.fecha}</span>
+          <span class="pos-nombre">${escaparHtml(h.temporada)} · Fecha ${escaparHtml(h.fecha)}</span>
           <span class="pos-stats">${h.exactos} exactos · ${h.jugados} jug.</span>
           <span class="pos-puntos">${h.puntos}</span>
         </li>`).join('');

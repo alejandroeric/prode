@@ -11,8 +11,8 @@ function lugarPodio(t, clase, medalla) {
   return `
     <div class="podio-lugar ${clase}">
       <div class="podio-medalla">${medalla}</div>
-      <div class="podio-avatar">${t.avatar || '👤'}</div>
-      <div class="podio-nombre">${t.nombre}</div>
+      <div class="podio-avatar">${escaparHtml(t.avatar) || '👤'}</div>
+      <div class="podio-nombre">${escaparHtml(t.nombre)}</div>
       <div class="podio-puntos">${t.puntos} pts</div>
     </div>`;
 }
@@ -52,7 +52,7 @@ async function cargar() {
     lista.innerHTML = tabla.map((t) => `
       <li class="fila-pos">
         <span class="pos-num">${t.posicion}º</span>
-        <span class="pos-nombre">${t.avatar || ''} ${t.nombre}</span>
+        <span class="pos-nombre">${escaparHtml(t.avatar)} ${escaparHtml(t.nombre)}</span>
         <span class="pos-stats">${t.exactos} exactos · ${t.efectividad}%</span>
         <span class="pos-puntos">${t.puntos}</span>
       </li>`).join('');

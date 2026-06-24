@@ -26,7 +26,7 @@ function formatearInicio(iso) {
 
 // Tarjeta de un partido: con inputs si se puede pronosticar, o bloqueada si ya cerro.
 function tarjetaPartido(p) {
-  const escudo = (url) => url ? `<img src="${url}" alt="" class="escudo" />` : '<span class="escudo"></span>';
+  const escudo = (url) => url ? `<img src="${escaparHtml(url)}" alt="" class="escudo" />` : '<span class="escudo"></span>';
   const pl = p.mi_pronostico ? p.mi_pronostico.goles_local : '';
   const pv = p.mi_pronostico ? p.mi_pronostico.goles_visitante : '';
 
@@ -37,8 +37,8 @@ function tarjetaPartido(p) {
     const miTexto = p.mi_pronostico ? `Tu pronóstico: ${pl}-${pv}` : 'No pronosticaste';
     return `
       <article class="tarjeta-partido bloqueada">
-        <div class="equipo">${escudo(p.escudo_local)}<span class="equipo-nombre">${p.local}</span></div>
-        <div class="equipo">${escudo(p.escudo_visitante)}<span class="equipo-nombre">${p.visitante}</span></div>
+        <div class="equipo">${escudo(p.escudo_local)}<span class="equipo-nombre">${escaparHtml(p.local)}</span></div>
+        <div class="equipo">${escudo(p.escudo_visitante)}<span class="equipo-nombre">${escaparHtml(p.visitante)}</span></div>
         <div class="partido-pie">
           <span class="badge estado-suspendido">Cerrado</span>
           <span class="partido-hora">${resultado} · ${miTexto}</span>
@@ -52,12 +52,12 @@ function tarjetaPartido(p) {
     <article class="tarjeta-partido" data-id="${p.id}">
       <div class="equipo">
         ${escudo(p.escudo_local)}
-        <span class="equipo-nombre">${p.local}</span>
+        <span class="equipo-nombre">${escaparHtml(p.local)}</span>
         <input type="number" class="gol-input pron-local" min="0" value="${pl}" placeholder="-" />
       </div>
       <div class="equipo">
         ${escudo(p.escudo_visitante)}
-        <span class="equipo-nombre">${p.visitante}</span>
+        <span class="equipo-nombre">${escaparHtml(p.visitante)}</span>
         <input type="number" class="gol-input pron-visitante" min="0" value="${pv}" placeholder="-" />
       </div>
       <div class="partido-pie">
@@ -142,7 +142,7 @@ async function verPronosticosDelGrupo(partidoId, contenedorGrupo) {
         const res = (p.goles_local != null && p.goles_visitante != null)
           ? `${p.goles_local}-${p.goles_visitante}`
           : '<span class="sin-datos">sin datos</span>';
-        return `<div class="grupo-fila"><span>${p.avatar || ''} ${p.nombre}</span><span class="grupo-gol">${res}</span></div>`;
+        return `<div class="grupo-fila"><span>${escaparHtml(p.avatar)} ${escaparHtml(p.nombre)}</span><span class="grupo-gol">${res}</span></div>`;
       })
       .join('');
   } catch {
