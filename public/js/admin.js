@@ -131,17 +131,21 @@ async function cargarGrupos() {
       ? grupos.map((g) => `<li class="grupo-item">
           <span class="grupo-nombre">${escaparHtml(g.nombre)}</span>
           <div class="grupo-acciones">
-            <button type="button" class="btn-tabla-wsp" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">📲 Tabla</button>
-            <button type="button" class="btn-campeon-wsp" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">🏆 Campeón</button>
             <button type="button" class="btn-editar-grupo" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">Editar</button>
             <button type="button" class="btn-borrar-grupo" data-id="${g.id}" data-nombre="${escaparHtml(g.nombre)}">Borrar</button>
           </div>
         </li>`).join('')
       : '<li class="vacio">Todavía no hay grupos.</li>';
 
-    selectorGrupoJugador.innerHTML = grupos
+    const opcionesGrupo = grupos
       .map((g) => `<option value="${g.id}">${escaparHtml(g.nombre)}</option>`)
       .join('');
+    selectorGrupoJugador.innerHTML = opcionesGrupo;
+    // Tambien los desplegables de Notificaciones (compartir tabla / anunciar campeon).
+    const notiTabla = document.getElementById('noti-tabla-grupo');
+    const notiCampeon = document.getElementById('noti-campeon-grupo');
+    if (notiTabla) notiTabla.innerHTML = opcionesGrupo;
+    if (notiCampeon) notiCampeon.innerHTML = opcionesGrupo;
   } catch {
     // si falla, no actualizamos
   }
@@ -164,8 +168,8 @@ async function compartirTabla(grupoId, nombreGrupo) {
   }
 }
 
-// Anunciar el campeon del torneo anterior por WhatsApp (mensaje listo).
-async function anunciarCampeon(grupoId) {
+// Anunciar el campeon del torneo anterior por WhatsApp, con una frase personalizada.
+async function anunciarCampeon(grupoId, frase) {
   try {
     const res = await fetch('/api/admin/grupos/' + grupoId + '/campeon', { headers: cabeceraAuth() });
     const { campeones, torneo } = await res.json();
@@ -175,20 +179,15 @@ async function anunciarCampeon(grupoId) {
     }
     const quien = campeones.join(' y ');
     const verbo = campeones.length > 1 ? 'salieron campeones' : 'salió campeón';
-    enviarWhatsApp(`🏆 ¡${quien} ${verbo} del ${torneo}! 🎉\nLTA, sigan participando 😎⚽`);
+    const cierre = frase && frase.trim() ? '\n' + frase.trim() : '';
+    enviarWhatsApp(`🏆 ¡${quien} ${verbo} del ${torneo}! 🎉${cierre}`);
   } catch {
     alert('No se pudo obtener el campeón.');
   }
 }
 
-// Un listener para los botones de cada grupo (compartir / campeon / renombrar / borrar).
+// Listener para los botones de cada grupo (renombrar / borrar).
 listaGrupos.addEventListener('click', async (e) => {
-  const wsp = e.target.closest('.btn-tabla-wsp');
-  if (wsp) { compartirTabla(wsp.dataset.id, wsp.dataset.nombre); return; }
-
-  const camp = e.target.closest('.btn-campeon-wsp');
-  if (camp) { anunciarCampeon(camp.dataset.id); return; }
-
   const editar = e.target.closest('.btn-editar-grupo');
   if (editar) {
     const nuevo = prompt('Nuevo nombre del grupo:', editar.dataset.nombre);
@@ -624,6 +623,23 @@ formConfig.addEventListener('submit', async (evento) => {
 // Recordatorio generico al grupo por WhatsApp.
 document.getElementById('btn-recordatorio').addEventListener('click', () => {
   enviarWhatsApp('⏰ ¡Recordatorio del Prode!\nNo te olvides de cargar tus pronósticos de la próxima fecha antes de que empiecen los partidos. ⚽🔮');
+});
+
+// Compartir tabla (Notificaciones): toma el grupo del desplegable.
+document.getElementById('btn-noti-tabla').addEventListener('click', () => {
+  const sel = document.getElementById('noti-tabla-grupo');
+  const id = sel.value;
+  if (!id) { alert('Primero creá un grupo.'); return; }
+  const grupo = gruposCache.find((g) => g.id === id);
+  compartirTabla(id, grupo ? grupo.nombre : '');
+});
+
+// Anunciar campeon (Notificaciones): grupo del desplegable + frase editable.
+document.getElementById('btn-noti-campeon').addEventListener('click', () => {
+  const id = document.getElementById('noti-campeon-grupo').value;
+  if (!id) { alert('Primero creá un grupo.'); return; }
+  const frase = document.getElementById('noti-campeon-frase').value;
+  anunciarCampeon(id, frase);
 });
 
 // ----- Pestañas del panel de admin -----

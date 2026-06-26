@@ -106,8 +106,23 @@
         <p class="texto-ayuda">El "torneo activo" define qué cuenta la tabla. Cambiarlo a uno nuevo = arrancar un torneo desde cero (el anterior queda guardado como historial). 🔄</p>
 
         <h2 class="subtitulo-seccion">Notificaciones</h2>
-        <button id="btn-recordatorio" type="button" class="boton-wsp">📲 Enviar recordatorio al grupo</button>
-        <p class="texto-ayuda">Abre WhatsApp con el mensaje listo; vos elegís el grupo y enviás.</p>
+        <p class="texto-ayuda">Cada botón abre WhatsApp con el mensaje listo; vos elegís el grupo/chat y enviás.</p>
+
+        <h3 class="subtitulo-mini">Recordatorio</h3>
+        <button id="btn-recordatorio" type="button" class="boton-wsp">📲 Enviar recordatorio</button>
+
+        <h3 class="subtitulo-mini">Compartir tabla de un grupo</h3>
+        <div class="formulario">
+          <select id="noti-tabla-grupo" class="selector"></select>
+          <button id="btn-noti-tabla" type="button" class="boton-wsp">📲 Compartir tabla</button>
+        </div>
+
+        <h3 class="subtitulo-mini">Anunciar campeón</h3>
+        <div class="formulario">
+          <select id="noti-campeon-grupo" class="selector"></select>
+          <input type="text" id="noti-campeon-frase" placeholder="Frase final del mensaje" value="LTA, sigan participando 😎" />
+          <button id="btn-noti-campeon" type="button" class="boton-wsp">🏆 Anunciar campeón</button>
+        </div>
       </div>
 
       <button id="btn-logout" class="boton-secundario">Cerrar sesión</button>
