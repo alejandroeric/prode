@@ -1,8 +1,8 @@
 {
-  "name": "Prode Fútbol Argentino",
-  "short_name": "Prode",
-  "description": "Juego de pronósticos de la Liga Profesional Argentina",
-  "start_url": "/fixture.html",
+  "name": "Prode — Administrador",
+  "short_name": "Prode Admin",
+  "description": "Panel de administración del Prode Fútbol Argentino",
+  "start_url": "/admin.html",
   "display": "standalone",
   "background_color": "#050a06",
   "theme_color": "#050a06",
