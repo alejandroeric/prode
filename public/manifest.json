@@ -2,7 +2,7 @@
   "name": "Prode Fútbol Argentino",
   "short_name": "Prode",
   "description": "Juego de pronósticos de la Liga Profesional Argentina",
-  "start_url": "/fixture.html",
+  "start_url": "/admin.html",
   "display": "standalone",
   "background_color": "#050a06",
   "theme_color": "#050a06",
