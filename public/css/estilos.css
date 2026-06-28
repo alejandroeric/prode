@@ -850,66 +850,21 @@ body.con-nav {
   margin-top: 0.7rem;
 }
 
-.btn-datos,
 .btn-pronos {
   flex: 1;
   padding: 0.5rem;
   border-radius: 6px;
   border: 1px solid #2a3a2a;
   background-color: transparent;
-  color: #6ea8ff;
+  color: #00e676;
   font-size: 0.85rem;
   cursor: pointer;
-}
-
-.btn-pronos {
-  color: #00e676;
 }
 
 .sin-datos {
   color: #888;
   font-style: italic;
   font-weight: 400;
-}
-
-.datos-partido:not(:empty) {
-  margin-top: 0.7rem;
-  padding-top: 0.7rem;
-  border-top: 1px solid #1f2a1f;
-}
-
-.datos-equipo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.3rem 0;
-}
-
-.datos-equipo small {
-  display: block;
-  color: #888;
-  font-size: 0.75rem;
-}
-
-.h2h-titulo {
-  font-size: 0.8rem;
-  color: #00e676;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0.8rem 0 0.4rem;
-}
-
-.h2h-fila {
-  display: flex;
-  gap: 0.6rem;
-  font-size: 0.82rem;
-  padding: 0.3rem 0;
-  border-top: 1px solid #141c14;
-}
-
-.h2h-fecha {
-  color: #777;
-  min-width: 5.5rem;
 }
 
 /* ----- Botones de WhatsApp (notificaciones) ----- */

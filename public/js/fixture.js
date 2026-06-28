@@ -53,10 +53,8 @@ function tarjetaPartido(p) {
         <span class="partido-hora">${finalizado ? (p.estadio || '') : formatearInicio(p.inicio)}</span>
       </div>
       <div class="acciones-partido">
-        <button type="button" class="btn-datos" data-partido="${p.id}">📊 Datos</button>
         <button type="button" class="btn-pronos" data-partido="${p.id}">🔮 Pronósticos</button>
       </div>
-      <div class="datos-partido" id="datos-${p.id}"></div>
       <div class="datos-partido" id="pronos-${p.id}"></div>
     </article>
   `;
@@ -74,44 +72,6 @@ function dibujarPronosticos(lista) {
   return `<h4 class="h2h-titulo">Pronósticos del grupo</h4>${filas}`;
 }
 
-// Dibuja el panel de datos (equipos + head-to-head).
-function dibujarDatos(s) {
-  const equipo = (e) => `
-    <div class="datos-equipo">
-      ${e.logo ? `<img src="${escaparHtml(e.logo)}" class="escudo" />` : '<span class="escudo"></span>'}
-      <div>
-        <strong>${escaparHtml(e.nombre)}</strong>
-        <small>${escaparHtml([e.estadio, e.ciudad, e.fundado ? 'desde ' + e.fundado : ''].filter(Boolean).join(' · '))}</small>
-      </div>
-    </div>`;
-
-  const h2h = s.h2h.length
-    ? s.h2h.map((h) => `
-        <div class="h2h-fila">
-          <span class="h2h-fecha">${h.fecha.slice(0, 10)}</span>
-          <span>${escaparHtml(h.local)} <b>${h.goles_local}-${h.goles_visitante}</b> ${escaparHtml(h.visitante)}</span>
-        </div>`).join('')
-    : '<p class="texto-ayuda">Sin enfrentamientos en el registro.</p>';
-
-  return `${equipo(s.local)}${equipo(s.visitante)}
-    <h4 class="h2h-titulo">Últimos enfrentamientos</h4>${h2h}`;
-}
-
-// Listener para "Datos" (equipos + head-to-head).
-contenedor.addEventListener('click', async (e) => {
-  const boton = e.target.closest('.btn-datos');
-  if (!boton) return;
-  const panel = document.getElementById('datos-' + boton.dataset.partido);
-  if (panel.innerHTML.trim() !== '') { panel.innerHTML = ''; return; } // segundo clic: ocultar
-  panel.innerHTML = '<p class="texto-ayuda">Cargando datos...</p>';
-  try {
-    const res = await fetch('/api/fixture/' + boton.dataset.partido + '/stats');
-    const stats = await res.json();
-    panel.innerHTML = dibujarDatos(stats);
-  } catch {
-    panel.innerHTML = '<p class="texto-ayuda">No se pudieron cargar los datos.</p>';
-  }
-});
 
 // Listener para "Pronósticos del grupo" (solo si el partido ya arranco).
 contenedor.addEventListener('click', async (e) => {
