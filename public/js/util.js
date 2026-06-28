@@ -1,7 +1,6 @@
 // util.js — Funciones compartidas del frontend.
 
 // Escapa texto para insertarlo seguro en HTML (evita XSS con nombres, etc.).
-// Convierte < > & " ' en sus entidades, asi nunca se interpreta como codigo.
 function escaparHtml(texto) {
   if (texto == null) return '';
   return String(texto)
@@ -10,4 +9,11 @@ function escaparHtml(texto) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// Registra el Service Worker para habilitar la PWA (instalacion como app).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
 }

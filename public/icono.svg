@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#050a06"/>
+  <text x="256" y="210" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="118" font-weight="900" fill="#00e676" letter-spacing="6">PRODE</text>
+  <!-- Pelota verde llena con parches oscuros -->
+  <circle cx="256" cy="360" r="110" fill="#00e676"/>
+  <!-- pentagono central -->
+  <polygon points="256,275 308,312 289,372 223,372 204,312" fill="#050a06"/>
+  <!-- parches -->
+  <polygon points="256,258 290,275 280,258" fill="#050a06"/>
+  <polygon points="322,298 338,332 316,320" fill="#050a06"/>
+  <polygon points="308,378 290,408 298,382" fill="#050a06"/>
+  <polygon points="204,378 186,408 214,384" fill="#050a06"/>
+  <polygon points="190,298 174,332 196,320" fill="#050a06"/>
+</svg>

@@ -1,0 +1,18 @@
+{
+  "name": "Prode Fútbol Argentino",
+  "short_name": "Prode",
+  "description": "Juego de pronósticos de la Liga Profesional Argentina",
+  "start_url": "/entrar",
+  "display": "standalone",
+  "background_color": "#050a06",
+  "theme_color": "#050a06",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
