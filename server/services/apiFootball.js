@@ -15,46 +15,68 @@ async function pedir(path) {
   return res.json();
 }
 
-// Normaliza un texto: minusculas, sin acentos.
+// Mapa estatico: nombre del equipo (como lo usamos en el Prode) -> id en API-Football.
+// Obtenido de la temporada 2023 de la liga argentina. Incluye equipos del Clausura 2026.
+const MAPA_EQUIPOS = {
+  'River Plate': { id: 435, logo: 'https://media.api-sports.io/football/teams/435.png', fundado: 1901, estadio: 'Estadio Monumental', ciudad: 'Buenos Aires' },
+  'Boca Juniors': { id: 451, logo: 'https://media.api-sports.io/football/teams/451.png', fundado: 1905, estadio: 'Estadio Alberto J. Armando', ciudad: 'Buenos Aires' },
+  'Racing Club': { id: 436, logo: 'https://media.api-sports.io/football/teams/436.png', fundado: 1903, estadio: 'Estadio Juan Domingo Perón', ciudad: 'Avellaneda' },
+  'Independiente': { id: 437, logo: 'https://media.api-sports.io/football/teams/437.png', fundado: 1905, estadio: 'Estadio Libertadores de América', ciudad: 'Avellaneda' },
+  'San Lorenzo': { id: 442, logo: 'https://media.api-sports.io/football/teams/442.png', fundado: 1908, estadio: 'Estadio Pedro Bidegain', ciudad: 'Buenos Aires' },
+  'Huracán': { id: 443, logo: 'https://media.api-sports.io/football/teams/443.png', fundado: 1908, estadio: 'Estadio Tomás Adolfo Ducó', ciudad: 'Buenos Aires' },
+  'Vélez Sarsfield': { id: 444, logo: 'https://media.api-sports.io/football/teams/444.png', fundado: 1910, estadio: 'Estadio José Amalfitani', ciudad: 'Buenos Aires' },
+  'Lanús': { id: 446, logo: 'https://media.api-sports.io/football/teams/446.png', fundado: 1915, estadio: 'Estadio Ciudad de Lanús', ciudad: 'Lanús' },
+  'Banfield': { id: 447, logo: 'https://media.api-sports.io/football/teams/447.png', fundado: 1896, estadio: 'Estadio Florencio Sola', ciudad: 'Banfield' },
+  'Rosario Central': { id: 448, logo: 'https://media.api-sports.io/football/teams/448.png', fundado: 1889, estadio: 'Estadio Gigante de Arroyito', ciudad: 'Rosario' },
+  "Newell's Old Boys": { id: 449, logo: 'https://media.api-sports.io/football/teams/449.png', fundado: 1903, estadio: 'Estadio Marcelo Bielsa', ciudad: 'Rosario' },
+  'Belgrano': { id: 450, logo: 'https://media.api-sports.io/football/teams/450.png', fundado: 1905, estadio: 'Estadio Mario Alberto Kempes', ciudad: 'Córdoba' },
+  'Estudiantes de La Plata': { id: 452, logo: 'https://media.api-sports.io/football/teams/452.png', fundado: 1905, estadio: 'Estadio Jorge Luis Hirschi', ciudad: 'La Plata' },
+  'Gimnasia y Esgrima de La Plata': { id: 453, logo: 'https://media.api-sports.io/football/teams/453.png', fundado: 1887, estadio: 'Estadio Juan Carlos Zerillo', ciudad: 'La Plata' },
+  'Defensa y Justicia': { id: 784, logo: 'https://media.api-sports.io/football/teams/784.png', fundado: 1935, estadio: 'Estadio Norberto Tomaghello', ciudad: 'Florencio Varela' },
+  'Talleres de Córdoba': { id: 435, logo: 'https://media.api-sports.io/football/teams/716.png', fundado: 1913, estadio: 'Estadio Mario Alberto Kempes', ciudad: 'Córdoba' },
+  'Platense': { id: 717, logo: 'https://media.api-sports.io/football/teams/717.png', fundado: 1905, estadio: 'Estadio Ciudad de Vicente López', ciudad: 'Buenos Aires' },
+  'Tigre': { id: 719, logo: 'https://media.api-sports.io/football/teams/719.png', fundado: 1902, estadio: 'Estadio José Dellagiovanna', ciudad: 'Victoria' },
+  'Sarmiento': { id: 720, logo: 'https://media.api-sports.io/football/teams/720.png', fundado: 1911, estadio: 'Estadio Eva Perón', ciudad: 'Junín' },
+  'Argentinos Juniors': { id: 440, logo: 'https://media.api-sports.io/football/teams/440.png', fundado: 1904, estadio: 'Estadio Diego Armando Maradona', ciudad: 'Buenos Aires' },
+  'Atlético Tucumán': { id: 716, logo: 'https://media.api-sports.io/football/teams/2283.png', fundado: 1902, estadio: 'Estadio Monumental José Fierro', ciudad: 'Tucumán' },
+  'Central Córdoba de Santiago del Estero': { id: 2289, logo: 'https://media.api-sports.io/football/teams/2289.png', fundado: 1906, estadio: 'Estadio Madre de Ciudades', ciudad: 'Santiago del Estero' },
+  'Barracas Central': { id: 7839, logo: 'https://media.api-sports.io/football/teams/7839.png', fundado: 1904, estadio: 'Estadio Guido Martino', ciudad: 'Buenos Aires' },
+  'Aldosivi': { id: 2283, logo: 'https://media.api-sports.io/football/teams/2283.png', fundado: 1913, estadio: 'Estadio José María Minella', ciudad: 'Mar del Plata' },
+  'Instituto': { id: 2294, logo: 'https://media.api-sports.io/football/teams/2294.png', fundado: 1918, estadio: 'Estadio Juan Domingo Perón', ciudad: 'Córdoba' },
+  'Gimnasia y Esgrima de Mendoza': { id: 2303, logo: 'https://media.api-sports.io/football/teams/2303.png', fundado: 1904, estadio: 'Estadio Mundialista', ciudad: 'Mendoza' },
+  'Unión': { id: 2297, logo: 'https://media.api-sports.io/football/teams/2297.png', fundado: 1907, estadio: 'Estadio 15 de Abril', ciudad: 'Santa Fe' },
+  'Deportivo Riestra': { id: 8765, logo: 'https://media.api-sports.io/football/teams/8765.png', fundado: 1916, estadio: 'Estadio Guillermo Laza', ciudad: 'Buenos Aires' },
+  'Independiente Rivadavia': { id: 2288, logo: 'https://media.api-sports.io/football/teams/2288.png', fundado: 1906, estadio: 'Estadio Bautista Gargantini', ciudad: 'Mendoza' },
+  'Estudiantes de Río Cuarto': { id: 9665, logo: 'https://media.api-sports.io/football/teams/9665.png', fundado: 1919, estadio: 'Estadio Ciudad de Río Cuarto', ciudad: 'Río Cuarto' },
+};
+
+// Normaliza texto para comparacion flexible.
 function normalizar(s) {
-  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-}
-function aTokens(s) {
-  return normalizar(s).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 }
 
-// Cache en memoria de los equipos de la liga (para resolver nombre -> id).
-let cacheEquipos = null;
-
-async function equiposLiga() {
-  if (cacheEquipos) return cacheEquipos;
-  const data = await pedir(`/teams?league=${LIGA_ARGENTINA}&season=2024`);
-  cacheEquipos = (data.response || []).map((t) => ({
-    id: t.team.id,
-    nombre: t.team.name,
-    logo: t.team.logo,
-    fundado: t.team.founded,
-    estadio: t.venue ? t.venue.name : null,
-    ciudad: t.venue ? t.venue.city : null,
-    n: normalizar(t.team.name),
-    toks: aTokens(t.team.name),
-  }));
-  return cacheEquipos;
-}
-
-// Resuelve un nombre de equipo (como lo guardamos) al equipo de API-Football.
+// Resuelve un nombre de equipo al objeto de API-Football usando el mapa estatico.
+// Usa el mapa primero (exacto o por palabras clave) — no hace pedidos a la API.
 async function resolverEquipo(nombre) {
-  const lista = await equiposLiga();
+  // 1. Coincidencia exacta en el mapa.
+  if (MAPA_EQUIPOS[nombre]) {
+    const d = MAPA_EQUIPOS[nombre];
+    return { id: d.id, nombre, logo: d.logo, fundado: d.fundado, estadio: d.estadio, ciudad: d.ciudad };
+  }
+  // 2. Busqueda por normalizacion (ignora acentos y mayusculas).
   const q = normalizar(nombre);
-  // 1) coincidencia exacta o por inclusion.
-  let m = lista.find((e) => e.n === q) || lista.find((e) => e.n.includes(q) || q.includes(e.n));
-  if (m) return m;
-  // 2) el que comparte mas palabras (>=3 letras) con el nombre buscado.
-  const qt = aTokens(nombre).filter((t) => t.length >= 3);
+  const entrada = Object.entries(MAPA_EQUIPOS).find(([k]) => normalizar(k) === q);
+  if (entrada) {
+    const d = entrada[1];
+    return { id: d.id, nombre: entrada[0], logo: d.logo, fundado: d.fundado, estadio: d.estadio, ciudad: d.ciudad };
+  }
+  // 3. Busqueda por palabras clave (ej: "Talleres" encuentra "Talleres de Cordoba").
+  const qt = q.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(t => t.length >= 4);
   let mejor = null, mejorScore = 0;
-  for (const e of lista) {
-    const compartidas = qt.filter((t) => e.toks.includes(t)).length;
-    if (compartidas > mejorScore) { mejorScore = compartidas; mejor = e; }
+  for (const [k, d] of Object.entries(MAPA_EQUIPOS)) {
+    const kt = normalizar(k).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/);
+    const score = qt.filter(t => kt.includes(t)).length;
+    if (score > mejorScore) { mejorScore = score; mejor = { id: d.id, nombre: k, logo: d.logo, fundado: d.fundado, estadio: d.estadio, ciudad: d.ciudad }; }
   }
   return mejorScore > 0 ? mejor : null;
 }
