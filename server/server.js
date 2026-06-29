@@ -51,4 +51,18 @@ app.use('/api/perfil', require('./routes/perfil'));
 
 app.listen(PORT, () => {
   console.log(`Servidor del Prode corriendo en http://localhost:${PORT}`);
+
+  // Keep-alive para el plan free de Render: cada 14 minutos se hace un ping
+  // a si mismo para que el servidor no se duerma por inactividad.
+  if (process.env.RENDER_EXTERNAL_URL) {
+    const url = process.env.RENDER_EXTERNAL_URL + '/api/ping';
+    setInterval(async () => {
+      try {
+        await fetch(url);
+        console.log('Keep-alive ping OK');
+      } catch {
+        // si falla el ping, no es critico
+      }
+    }, 14 * 60 * 1000); // cada 14 minutos
+  }
 });
