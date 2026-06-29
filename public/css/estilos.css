@@ -740,6 +740,95 @@ h1 {
   margin-top: 0.2rem;
 }
 
+/* ----- Botón flotante de ayuda (ⓘ) ----- */
+
+.btn-ayuda {
+  position: fixed;
+  bottom: 72px; /* justo encima del menu inferior */
+  right: 1rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: 1px solid #2a3a2a;
+  background-color: #111811;
+  color: #00e676;
+  font-size: 1.1rem;
+  cursor: pointer;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ----- Tutorial de bienvenida (modal paso a paso) ----- */
+
+.tut-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.tut-card {
+  background-color: #111811;
+  border: 1px solid #1f2a1f;
+  border-radius: 16px;
+  padding: 2rem 1.5rem 1.5rem;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tut-icono {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.tut-titulo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #00e676;
+  margin: 0;
+}
+
+.tut-texto {
+  font-size: 0.9rem;
+  color: #c0c0c0;
+  line-height: 1.7;
+  margin: 0;
+  text-align: left;
+}
+
+.tut-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.tut-contador {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.tut-btn {
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #00e676;
+  color: #0a0f0a;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
 /* ----- Menu inferior fijo (navegacion de la app) ----- */
 
 body.con-nav {

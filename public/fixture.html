@@ -32,7 +32,24 @@
     <a href="perfil.html" class="nav-item">👤<span>Perfil</span></a>
   </nav>
 
+  <!-- Boton de ayuda flotante -->
+  <button id="btn-ayuda" class="btn-ayuda" title="Ayuda">ⓘ</button>
+
+  <!-- Tutorial (reutilizable desde cualquier pantalla) -->
+  <div id="tutorial-modal" class="tut-overlay" style="display:none;">
+    <div class="tut-card">
+      <div id="tut-icono" class="tut-icono"></div>
+      <h2 id="tut-titulo" class="tut-titulo"></h2>
+      <p id="tut-texto" class="tut-texto"></p>
+      <div class="tut-pie">
+        <span id="tut-contador" class="tut-contador"></span>
+        <button id="tut-siguiente" type="button" class="tut-btn">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/util.js"></script>
+  <script src="js/tutorial.js"></script>
   <script src="js/fixture.js"></script>
 </body>
 </html>

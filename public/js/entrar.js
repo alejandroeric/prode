@@ -106,13 +106,17 @@ formPerfil.addEventListener('submit', async (evento) => {
       return;
     }
 
-    // Listo: por ahora mostramos confirmacion (la app real viene en proximos modulos).
+    // Perfil guardado: mostramos el tutorial antes de ir al Fixture.
     bienvenida.style.display = 'none';
-    estado.style.display = 'block';
-    mostrarOk('¡Listo, ' + datos.jugador.nombre + ' ' + (datos.jugador.avatar || '') + '! Ya estás dentro.');
+    mostrarTutorial(datos.jugador.nombre, datos.jugador.avatar);
   } catch {
     errorPerfil.textContent = 'No se pudo conectar con el servidor.';
   }
 });
+
+// Muestra el tutorial y al terminar redirige al Fixture.
+function mostrarTutorial() {
+  abrirTutorial(() => { window.location.href = '/fixture.html'; });
+}
 
 entrar();

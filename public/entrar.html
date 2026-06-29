@@ -39,7 +39,21 @@
     </section>
   </main>
 
+  <!-- Tutorial de bienvenida (aparece una sola vez tras elegir nombre y avatar) -->
+  <div id="tutorial-modal" class="tut-overlay" style="display:none;">
+    <div class="tut-card">
+      <div id="tut-icono" class="tut-icono"></div>
+      <h2 id="tut-titulo" class="tut-titulo"></h2>
+      <p id="tut-texto" class="tut-texto"></p>
+      <div class="tut-pie">
+        <span id="tut-contador" class="tut-contador"></span>
+        <button id="tut-siguiente" type="button" class="tut-btn">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/util.js"></script>
+  <script src="js/tutorial.js"></script>
   <script src="js/entrar.js"></script>
 </body>
 </html>
