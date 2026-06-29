@@ -37,14 +37,24 @@ async function guardarPartidos(partidos) {
 }
 
 // Sincroniza los proximos + ultimos partidos que ofrece la API.
+// Solo guarda los que coincidan con el TORNEO ACTIVO para no mezclar temporadas.
 async function sincronizarDesdeApi() {
+  const { obtenerConfig } = require('./configuracion');
+  const { temporada_activa } = await obtenerConfig();
+
   const [proximos, ultimos] = await Promise.all([
     futbolApi.obtenerProximosPartidos(),
     futbolApi.obtenerUltimosPartidos(),
   ]);
   const todos = [...proximos, ...ultimos];
-  const guardados = await guardarPartidos(todos);
-  return { recibidos: todos.length, guardados };
+
+  // Filtrar solo los del torneo activo (evita mezclar con otras temporadas).
+  const filtrados = temporada_activa
+    ? todos.filter(p => p.temporada === temporada_activa)
+    : todos;
+
+  const guardados = await guardarPartidos(filtrados);
+  return { recibidos: todos.length, guardados, filtrados: filtrados.length };
 }
 
 // Sincroniza una fecha (ronda) concreta de una temporada.
