@@ -39,13 +39,46 @@ router.get('/:id/stats', async (req, res) => {
   }
 });
 
+// Proteccion de abuso: max 30 generaciones nuevas por hora (no aplica a analisis ya cacheados).
+const MAX_GENERACIONES_POR_HORA = 30;
+const VENTANA_GENERACION_MS = 60 * 60 * 1000;
+let generacionesRecientes = [];
+
+// IDs de partidos cuyo analisis se esta generando ahora (evita llamadas duplicadas en paralelo).
+const enGeneracion = new Set();
+
 // GET /api/fixture/:id/analisis  ->  devuelve el analisis del partido (lo genera si no existe).
 router.get('/:id/analisis', async (req, res) => {
+  const id = req.params.id;
+
+  // Si ya hay una generacion en curso para este partido, rechazar.
+  if (enGeneracion.has(id)) {
+    return res.status(429).json({ error: 'El análisis se está generando, intentá en unos segundos.' });
+  }
+
   try {
-    const analisis = await obtenerOGenerarAnalisis(req.params.id);
+    // Si ya existe en DB, devolverlo directo sin contar el limite.
+    const { data: partido } = await require('../services/supabase').supabase
+      .from('partidos').select('analisis').eq('id', id).single();
+    if (partido && partido.analisis) {
+      return res.json(partido.analisis);
+    }
+
+    // Verificar el limite de generaciones nuevas.
+    const ahora = Date.now();
+    generacionesRecientes = generacionesRecientes.filter((t) => ahora - t < VENTANA_GENERACION_MS);
+    if (generacionesRecientes.length >= MAX_GENERACIONES_POR_HORA) {
+      return res.status(429).json({ error: 'Límite de análisis alcanzado, intentá más tarde.' });
+    }
+
+    enGeneracion.add(id);
+    generacionesRecientes.push(ahora);
+    const analisis = await obtenerOGenerarAnalisis(id);
     res.json(analisis);
   } catch (e) {
     res.status(500).json({ error: e.message || 'No se pudo generar el análisis' });
+  } finally {
+    enGeneracion.delete(id);
   }
 });
 

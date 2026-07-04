@@ -86,7 +86,18 @@ async function obtenerOGenerarAnalisis(partidoId) {
   if (error || !partido) throw new Error('Partido no encontrado');
   if (partido.analisis) return partido.analisis;
 
-  const resultado = await generarAnalisisPartido(partido.local, partido.visitante, partido.temporada);
+  // Si Claude falla o devuelve JSON malformado, guardamos un fallback para no reintentar.
+  let resultado;
+  try {
+    resultado = await generarAnalisisPartido(partido.local, partido.visitante, partido.temporada);
+  } catch {
+    resultado = {
+      analisis: 'No se pudo generar el análisis para este partido.',
+      historial: '',
+      dato_curioso: '',
+      resultado_probable: '?-?',
+    };
+  }
 
   await supabase.from('partidos').update({ analisis: resultado }).eq('id', partidoId);
   return resultado;
