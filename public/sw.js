@@ -1,5 +1,5 @@
 // Service Worker del Prode — permite instalar la app como PWA.
-const CACHE = 'prode-v4';
+const CACHE = 'prode-v5';
 const PRECACHE = [
   '/',
   '/fixture.html',
