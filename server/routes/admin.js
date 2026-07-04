@@ -16,6 +16,7 @@ const {
   actualizarPartido,
   borrarPartido,
 } = require('../services/fixture');
+const { analizarFecha } = require('../services/analisis');
 
 // Arma el enlace magico completo a partir del token. Usa el host de la peticion,
 // asi funciona igual en localhost y, mas adelante, en el dominio real.
@@ -198,6 +199,21 @@ router.delete('/jugadores/:id', requiereAdmin, async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'No se pudo borrar el jugador' });
+  }
+});
+
+// POST /api/admin/fixture/analizar  ->  genera analisis con Claude para todos los
+// partidos de una fecha que aun no lo tengan. Body: { temporada, fecha_numero }.
+router.post('/fixture/analizar', requiereAdmin, async (req, res) => {
+  const { temporada, fecha_numero } = req.body || {};
+  if (!temporada || !fecha_numero) {
+    return res.status(400).json({ error: 'Faltan temporada y/o fecha_numero' });
+  }
+  try {
+    const resultado = await analizarFecha(temporada, Number(fecha_numero));
+    res.json(resultado);
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'No se pudo generar el analisis' });
   }
 });
 

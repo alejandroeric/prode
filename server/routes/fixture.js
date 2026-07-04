@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { temporadasDisponibles, partidosDeFecha } = require('../services/fixture');
 const { estadisticasDePartido } = require('../services/estadisticas');
+const { obtenerOGenerarAnalisis } = require('../services/analisis');
 
 // GET /api/fixture/temporadas  ->  temporadas disponibles con sus fechas.
 router.get('/temporadas', async (req, res) => {
@@ -35,6 +36,16 @@ router.get('/:id/stats', async (req, res) => {
     res.json(stats);
   } catch (e) {
     res.status(500).json({ error: 'No se pudieron obtener las estadisticas' });
+  }
+});
+
+// GET /api/fixture/:id/analisis  ->  devuelve el analisis del partido (lo genera si no existe).
+router.get('/:id/analisis', async (req, res) => {
+  try {
+    const analisis = await obtenerOGenerarAnalisis(req.params.id);
+    res.json(analisis);
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'No se pudo generar el análisis' });
   }
 });
 

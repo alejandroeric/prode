@@ -14,6 +14,7 @@
   "author": "Eric Nofal",
   "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
     "@supabase/supabase-js": "^2.108.2",
     "bcryptjs": "^3.0.3",
     "express": "^5.2.1"

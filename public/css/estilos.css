@@ -1,4 +1,4 @@
-/* estilos.css — Estilos base del Prode.
+﻿/* estilos.css — Estilos base del Prode.
    Diseño oscuro, agresivo y moderno (inspiracion: Bet365 / Codere).
    Por ahora solo la pantalla de inicio; se ira ampliando por modulo. */
 
@@ -1055,4 +1055,75 @@ body.con-nav {
 .grupo-gol {
   font-weight: 700;
   color: #00e676;
+}
+
+
+/* ----- Panel de analisis de partido (generado por IA) ----- */
+
+.btn-analisis {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #2a2a3a;
+  background-color: transparent;
+  color: #6ea8ff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.panel-analisis {
+  margin-top: 0.8rem;
+  padding: 0.9rem;
+  background-color: #0d0f1a;
+  border: 1px solid #2a2a3a;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.analisis-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.analisis-etiqueta {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6ea8ff;
+}
+
+.analisis-texto {
+  font-size: 0.88rem;
+  color: #ccc;
+  line-height: 1.45;
+}
+
+.analisis-resultado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid #2a2a3a;
+}
+
+.analisis-score {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #00e676;
+}
+
+/* ----- Boton Analizar en admin ----- */
+
+.btn-analizar {
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #2a2a3a;
+  background-color: transparent;
+  color: #6ea8ff;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
