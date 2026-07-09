@@ -54,33 +54,9 @@ function tarjetaPartido(p) {
       </div>
       <div class="acciones-partido">
         <button type="button" class="btn-pronos" data-partido="${p.id}">🔮 Pronósticos</button>
-        <button type="button" class="btn-analisis" data-partido="${p.id}">Análisis partido</button>
       </div>
       <div class="datos-partido" id="pronos-${p.id}"></div>
-      <div class="panel-analisis" id="analisis-${p.id}" style="display:none;">${p.analisis ? renderAnalisis(p.analisis) : ''}</div>
     </article>
-  `;
-}
-
-// Genera el HTML del panel de analisis con los 4 campos elegidos.
-function renderAnalisis(a) {
-  return `
-    <div class="analisis-item">
-      <span class="analisis-etiqueta">Análisis</span>
-      <p class="analisis-texto">${escaparHtml(a.analisis || '')}</p>
-    </div>
-    <div class="analisis-item">
-      <span class="analisis-etiqueta">Historial</span>
-      <p class="analisis-texto">${escaparHtml(a.historial || '')}</p>
-    </div>
-    <div class="analisis-item">
-      <span class="analisis-etiqueta">Dato curioso</span>
-      <p class="analisis-texto">${escaparHtml(a.dato_curioso || '')}</p>
-    </div>
-    <div class="analisis-resultado">
-      <span class="analisis-etiqueta">Resultado probable</span>
-      <span class="analisis-score">${escaparHtml(a.resultado_probable || '?-?')}</span>
-    </div>
   `;
 }
 
@@ -96,40 +72,6 @@ function dibujarPronosticos(lista) {
   return `<h4 class="h2h-titulo">Pronósticos del grupo</h4>${filas}`;
 }
 
-
-// Listener para "Análisis" — genera (si no existe) y abre/cierra el panel.
-contenedor.addEventListener('click', async (e) => {
-  const boton = e.target.closest('.btn-analisis');
-  if (!boton) return;
-  const panel = document.getElementById('analisis-' + boton.dataset.partido);
-  if (!panel) return;
-
-  // Si el panel ya tiene contenido, solo alternar visibilidad.
-  if (panel.innerHTML.trim() !== '') {
-    const abierto = panel.style.display !== 'none';
-    panel.style.display = abierto ? 'none' : 'block';
-    boton.textContent = abierto ? 'Análisis partido' : 'Cerrar';
-    return;
-  }
-
-  // Primera vez: generar el análisis.
-  boton.disabled = true;
-  boton.textContent = 'Generando...';
-  panel.style.display = 'block';
-  panel.innerHTML = '<p class="texto-ayuda">Consultando análisis...</p>';
-  try {
-    const res = await fetch('/api/fixture/' + boton.dataset.partido + '/analisis');
-    if (!res.ok) throw new Error();
-    const datos = await res.json();
-    panel.innerHTML = renderAnalisis(datos);
-    boton.textContent = 'Cerrar';
-  } catch {
-    panel.innerHTML = '<p class="texto-ayuda">No se pudo generar el análisis.</p>';
-    boton.textContent = 'Análisis partido';
-  } finally {
-    boton.disabled = false;
-  }
-});
 
 // Listener para "Pronósticos del grupo" (solo si el partido ya arranco).
 contenedor.addEventListener('click', async (e) => {

@@ -68,6 +68,13 @@ document.getElementById('tut-siguiente').addEventListener('click', () => {
   }
 });
 
+// Boton X para cerrar el tutorial antes de terminar.
+const btnCerrar = document.getElementById('tut-cerrar');
+if (btnCerrar) btnCerrar.addEventListener('click', () => {
+  document.getElementById('tutorial-modal').style.display = 'none';
+  if (alTerminar) alTerminar();
+});
+
 // Boton de ayuda flotante (ⓘ) — presente en todas las pantallas del jugador.
 const btnAyuda = document.getElementById('btn-ayuda');
 if (btnAyuda) btnAyuda.addEventListener('click', () => abrirTutorial());
