@@ -106,13 +106,53 @@ formPerfil.addEventListener('submit', async (evento) => {
       return;
     }
 
-    // Perfil guardado: mostramos el tutorial antes de ir al Fixture.
+    // Perfil guardado: mostramos install (si aplica) y luego el tutorial.
     bienvenida.style.display = 'none';
-    mostrarTutorial(datos.jugador.nombre, datos.jugador.avatar);
+    mostrarInstall();
   } catch {
     errorPerfil.textContent = 'No se pudo conectar con el servidor.';
   }
 });
+
+// Detecta qué tipo de instalacion corresponde mostrar (o ninguna).
+function detectarInstall() {
+  if (localStorage.getItem('prode_pwa_visto')) return 'skip';
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return 'skip';
+  if (window._pwaPrompt) return 'android';
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) return 'ios';
+  return 'skip';
+}
+
+// Muestra la pantalla de instalacion PWA una sola vez al jugador nuevo.
+// Cuando termina (instala o salta), abre el tutorial.
+function mostrarInstall() {
+  const tipo = detectarInstall();
+  localStorage.setItem('prode_pwa_visto', '1');
+
+  if (tipo === 'skip') {
+    mostrarTutorial();
+    return;
+  }
+
+  const view = document.getElementById('install-view');
+  view.style.display = 'flex';
+
+  if (tipo === 'android') {
+    document.getElementById('install-android').style.display = 'block';
+    document.getElementById('btn-instalar').addEventListener('click', async () => {
+      view.style.display = 'none';
+      await window._pwaPrompt.prompt();
+      mostrarTutorial();
+    });
+  } else {
+    document.getElementById('install-ios').style.display = 'block';
+  }
+
+  document.getElementById('btn-saltar-install').addEventListener('click', () => {
+    view.style.display = 'none';
+    mostrarTutorial();
+  });
+}
 
 // Muestra el tutorial y al terminar redirige al Fixture.
 function mostrarTutorial() {

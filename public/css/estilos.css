@@ -1141,3 +1141,23 @@ body.con-nav {
   font-size: 0.9rem;
   cursor: pointer;
 }
+
+
+/* ----- Pantalla de instalacion PWA ----- */
+
+.install-icono {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.install-pasos {
+  text-align: left;
+  padding-left: 1.2rem;
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  color: #c0c0c0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}

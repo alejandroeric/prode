@@ -11,6 +11,14 @@ function escaparHtml(texto) {
     .replace(/'/g, '&#39;');
 }
 
+// Captura el evento de instalacion PWA lo antes posible (Android/Chrome).
+// Se guarda en window._pwaPrompt para usarlo cuando el jugador lo pida.
+window._pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window._pwaPrompt = e;
+});
+
 // Registra el Service Worker para habilitar la PWA (instalacion como app).
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

@@ -39,6 +39,31 @@
     </section>
   </main>
 
+  <!-- Pantalla de instalacion PWA (aparece una sola vez, solo para jugadores nuevos) -->
+  <div id="install-view" class="pantalla-centrada" style="display:none;">
+    <section class="tarjeta">
+      <div class="install-icono">📲</div>
+      <h2 class="subtitulo-seccion">Instalá la app en tu celu</h2>
+      <p class="texto-ayuda">Así la tenés en la pantalla de inicio como cualquier app.</p>
+
+      <!-- Android: boton nativo -->
+      <div id="install-android" style="display:none;">
+        <button id="btn-instalar" type="button">Instalar app</button>
+      </div>
+
+      <!-- iOS: instrucciones paso a paso -->
+      <div id="install-ios" style="display:none;">
+        <ol class="install-pasos">
+          <li>Tocá el botón <strong>Compartir</strong> (□↑) en la barra de Safari</li>
+          <li>Elegí <strong>"Agregar a pantalla de inicio"</strong></li>
+          <li>Tocá <strong>"Agregar"</strong> arriba a la derecha</li>
+        </ol>
+      </div>
+
+      <button id="btn-saltar-install" type="button" class="boton-secundario" style="margin-top:1rem;">Ahora no</button>
+    </section>
+  </div>
+
   <!-- Tutorial de bienvenida (aparece una sola vez tras elegir nombre y avatar) -->
   <div id="tutorial-modal" class="tut-overlay" style="display:none;">
     <div class="tut-card">
