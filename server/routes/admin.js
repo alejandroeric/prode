@@ -222,8 +222,8 @@ router.post('/fixture/analizar', requiereAdmin, async (req, res) => {
 // Usar una sola vez cuando hay escudos incorrectos guardados en la DB.
 router.post('/fixture/reparar-escudos', requiereAdmin, async (req, res) => {
   try {
-    const reparados = await repararEscudos();
-    res.json({ reparados, mensaje: `Escudos reparados en ${reparados} partidos.` });
+    const { reparados, sinEscudo } = await repararEscudos();
+    res.json({ reparados, sinEscudo });
   } catch (e) {
     res.status(500).json({ error: e.message || 'No se pudieron reparar los escudos' });
   }

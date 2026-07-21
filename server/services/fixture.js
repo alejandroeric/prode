@@ -120,18 +120,25 @@ async function buscarEscudo(nombre) {
 
 // Recorre todos los partidos y reaplica los escudos usando el mapa estatico.
 // Usar una sola vez cuando los escudos guardados en la DB son incorrectos.
+// Recorre todos los partidos, aplica escudos del mapa estático y reporta
+// los equipos que siguen sin escudo (nombre no reconocido en el mapa).
 async function repararEscudos() {
   const { data: partidos, error } = await supabase
     .from('partidos')
-    .select('id, local, visitante');
+    .select('id, local, visitante, escudo_local, escudo_visitante');
   if (error) throw new Error(error.message);
 
   let reparados = 0;
+  const sinEscudo = new Set();
+
   for (const p of partidos) {
     const [escudoLocal, escudoVisitante] = await Promise.all([
       buscarEscudo(p.local),
       buscarEscudo(p.visitante),
     ]);
+    if (!escudoLocal) sinEscudo.add(p.local);
+    if (!escudoVisitante) sinEscudo.add(p.visitante);
+
     const update = {};
     if (escudoLocal) update.escudo_local = escudoLocal;
     if (escudoVisitante) update.escudo_visitante = escudoVisitante;
@@ -140,7 +147,7 @@ async function repararEscudos() {
       reparados++;
     }
   }
-  return reparados;
+  return { reparados, sinEscudo: [...sinEscudo].sort() };
 }
 
 // Crea un partido cargado a mano (origen 'manual'). Intenta completar los escudos solo.

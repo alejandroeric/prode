@@ -447,7 +447,13 @@ document.getElementById('btn-reparar-escudos').addEventListener('click', async (
     });
     const datos = await res.json();
     if (res.ok) {
-      estadoFixture.textContent = datos.mensaje || 'Escudos reparados.';
+      if (datos.sinEscudo && datos.sinEscudo.length > 0) {
+        estadoFixture.textContent = `Reparados ${datos.reparados} partidos. ⚠️ Sin escudo: ${datos.sinEscudo.join(', ')}`;
+        estadoFixture.style.color = '#ff9800';
+      } else {
+        estadoFixture.textContent = `Reparados ${datos.reparados} partidos. Todos los escudos están OK.`;
+        estadoFixture.style.color = '';
+      }
     } else {
       estadoFixture.textContent = datos.error || 'No se pudieron reparar los escudos.';
     }
