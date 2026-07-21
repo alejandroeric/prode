@@ -300,7 +300,10 @@ function crearItemJugador(j) {
 
   const nombre = j.nombre || '(sin nombre)';
   const suspendido = j.estado === 'suspendido';
-  const estado = suspendido ? '⏸️ suspendido' : (j.ultimo_acceso ? 'ya entró' : 'no entró aún');
+  const fechaAcceso = j.ultimo_acceso
+    ? new Date(j.ultimo_acceso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    : null;
+  const estado = suspendido ? 'suspendido' : (fechaAcceso ? `último acceso: ${fechaAcceso}` : 'no entró aún');
 
   const opcionesGrupo = gruposCache
     .map((g) => `<option value="${g.id}" ${g.id === j.grupo_id ? 'selected' : ''}>${g.nombre}</option>`)
