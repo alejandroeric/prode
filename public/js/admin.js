@@ -436,6 +436,28 @@ btnSincronizar.addEventListener('click', async () => {
   }
 });
 
+// Repara escudos incorrectos en todos los partidos de la DB.
+document.getElementById('btn-reparar-escudos').addEventListener('click', async () => {
+  estadoFixture.textContent = 'Reparando escudos...';
+  document.getElementById('btn-reparar-escudos').disabled = true;
+  try {
+    const res = await fetch('/api/admin/fixture/reparar-escudos', {
+      method: 'POST',
+      headers: cabeceraAuth(),
+    });
+    const datos = await res.json();
+    if (res.ok) {
+      estadoFixture.textContent = datos.mensaje || 'Escudos reparados.';
+    } else {
+      estadoFixture.textContent = datos.error || 'No se pudieron reparar los escudos.';
+    }
+  } catch {
+    estadoFixture.textContent = 'No se pudo conectar con el servidor.';
+  } finally {
+    document.getElementById('btn-reparar-escudos').disabled = false;
+  }
+});
+
 // ----- Carga manual y edicion de partidos -----
 
 const formPartido = document.getElementById('form-partido');

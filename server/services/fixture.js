@@ -106,14 +106,41 @@ async function equiposCargados() {
   return [...set].sort((a, b) => a.localeCompare(b));
 }
 
-// Busca el escudo de un equipo por su nombre (best-effort: null si no lo encuentra).
+// Busca el escudo de un equipo por su nombre usando el mapa estatico de equipos argentinos.
+// 100% estatico: sin llamadas externas, sin riesgo de traer escudos de otros paises.
+// Si el equipo no esta en el mapa, devuelve null.
 async function buscarEscudo(nombre) {
   try {
-    const eq = await futbolApi.buscarEquipo(nombre);
-    return eq ? eq.escudo : null;
+    const entrada = await apiFootball.resolverEquipo(nombre);
+    return entrada ? entrada.logo : null;
   } catch {
     return null;
   }
+}
+
+// Recorre todos los partidos y reaplica los escudos usando el mapa estatico.
+// Usar una sola vez cuando los escudos guardados en la DB son incorrectos.
+async function repararEscudos() {
+  const { data: partidos, error } = await supabase
+    .from('partidos')
+    .select('id, local, visitante');
+  if (error) throw new Error(error.message);
+
+  let reparados = 0;
+  for (const p of partidos) {
+    const [escudoLocal, escudoVisitante] = await Promise.all([
+      buscarEscudo(p.local),
+      buscarEscudo(p.visitante),
+    ]);
+    const update = {};
+    if (escudoLocal) update.escudo_local = escudoLocal;
+    if (escudoVisitante) update.escudo_visitante = escudoVisitante;
+    if (Object.keys(update).length > 0) {
+      await supabase.from('partidos').update(update).eq('id', p.id);
+      reparados++;
+    }
+  }
+  return reparados;
 }
 
 // Crea un partido cargado a mano (origen 'manual'). Intenta completar los escudos solo.
@@ -250,4 +277,5 @@ module.exports = {
   actualizarPartido,
   borrarPartido,
   guardarPartidos,
+  repararEscudos,
 };

@@ -15,6 +15,7 @@ const {
   crearPartidosEnLote,
   actualizarPartido,
   borrarPartido,
+  repararEscudos,
 } = require('../services/fixture');
 const { analizarFecha } = require('../services/analisis');
 
@@ -214,6 +215,17 @@ router.post('/fixture/analizar', requiereAdmin, async (req, res) => {
     res.json(resultado);
   } catch (e) {
     res.status(500).json({ error: e.message || 'No se pudo generar el analisis' });
+  }
+});
+
+// POST /api/admin/fixture/reparar-escudos  ->  reaplica escudos correctos a todos los partidos.
+// Usar una sola vez cuando hay escudos incorrectos guardados en la DB.
+router.post('/fixture/reparar-escudos', requiereAdmin, async (req, res) => {
+  try {
+    const reparados = await repararEscudos();
+    res.json({ reparados, mensaje: `Escudos reparados en ${reparados} partidos.` });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'No se pudieron reparar los escudos' });
   }
 });
 
