@@ -467,6 +467,35 @@ document.getElementById('btn-reparar-escudos').addEventListener('click', async (
   }
 });
 
+// Repara partidos duplicados: migra pronósticos al registro correcto y borra los duplicados.
+document.getElementById('btn-reparar-duplicados').addEventListener('click', async () => {
+  if (!confirm('¿Reparar duplicados?\n\nEsto migra los pronósticos de los jugadores al partido correcto y elimina los registros duplicados.')) return;
+  estadoFixture.textContent = 'Buscando y reparando duplicados...';
+  document.getElementById('btn-reparar-duplicados').disabled = true;
+  try {
+    const res = await fetch('/api/admin/fixture/reparar-duplicados', {
+      method: 'POST',
+      headers: cabeceraAuth(),
+    });
+    const datos = await res.json();
+    if (res.ok) {
+      if (datos.partidosEliminados === 0) {
+        estadoFixture.textContent = 'No se encontraron duplicados.';
+      } else {
+        estadoFixture.textContent =
+          `Reparado: ${datos.partidosEliminados} partido(s) duplicado(s) eliminado(s), ${datos.pronosticosMigrados} pronóstico(s) migrado(s).`;
+      }
+      cargarConteoPartidos();
+    } else {
+      estadoFixture.textContent = datos.error || 'No se pudo reparar.';
+    }
+  } catch {
+    estadoFixture.textContent = 'No se pudo conectar con el servidor.';
+  } finally {
+    document.getElementById('btn-reparar-duplicados').disabled = false;
+  }
+});
+
 // ----- Carga manual y edicion de partidos -----
 
 const formPartido = document.getElementById('form-partido');

@@ -16,6 +16,7 @@ const {
   actualizarPartido,
   borrarPartido,
   repararEscudos,
+  repararDuplicados,
 } = require('../services/fixture');
 const { analizarFecha } = require('../services/analisis');
 
@@ -226,6 +227,16 @@ router.post('/fixture/reparar-escudos', requiereAdmin, async (req, res) => {
     res.json({ reparados, sinEscudo });
   } catch (e) {
     res.status(500).json({ error: e.message || 'No se pudieron reparar los escudos' });
+  }
+});
+
+// POST /api/admin/fixture/reparar-duplicados  ->  migra pronósticos y elimina partidos duplicados.
+router.post('/fixture/reparar-duplicados', requiereAdmin, async (req, res) => {
+  try {
+    const resultado = await repararDuplicados();
+    res.json(resultado);
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'No se pudieron reparar los duplicados' });
   }
 });
 

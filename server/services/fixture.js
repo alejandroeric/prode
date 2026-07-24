@@ -152,6 +152,13 @@ async function repararEscudos() {
 
 // Crea un partido cargado a mano (origen 'manual'). Intenta completar los escudos solo.
 async function crearPartidoManual(datos) {
+  const { data: existente } = await supabase
+    .from('partidos').select('id')
+    .eq('temporada', datos.temporada).eq('fecha_numero', datos.fecha_numero)
+    .eq('local', datos.local).eq('visitante', datos.visitante)
+    .maybeSingle();
+  if (existente) throw new Error(`Ya existe ${datos.local} vs ${datos.visitante} en la fecha ${datos.fecha_numero}`);
+
   const [escudoLocal, escudoVisitante] = await Promise.all([
     buscarEscudo(datos.local),
     buscarEscudo(datos.visitante),
@@ -190,13 +197,25 @@ async function crearPartidoManual(datos) {
 async function crearPartidosEnLote(partidos, origen = 'captura') {
   if (!partidos || partidos.length === 0) return 0;
 
+  // Filtrar los que ya existen (evita duplicados si se llama dos veces).
+  const existencias = await Promise.all(partidos.map(async (p) => {
+    const { data } = await supabase
+      .from('partidos').select('id')
+      .eq('temporada', p.temporada).eq('fecha_numero', p.fecha_numero)
+      .eq('local', p.local).eq('visitante', p.visitante)
+      .maybeSingle();
+    return !!data;
+  }));
+  const nuevos = partidos.filter((_, i) => !existencias[i]);
+  if (nuevos.length === 0) return 0;
+
   // Juntar todos los equipos distintos y buscar sus escudos una sola vez.
   const equipos = new Set();
-  partidos.forEach((p) => { equipos.add(p.local); equipos.add(p.visitante); });
+  nuevos.forEach((p) => { equipos.add(p.local); equipos.add(p.visitante); });
   const escudos = {};
   await Promise.all([...equipos].map(async (e) => { escudos[e] = await buscarEscudo(e); }));
 
-  const filas = partidos.map((p) => ({
+  const filas = nuevos.map((p) => ({
     temporada: p.temporada,
     fecha_numero: p.fecha_numero,
     local: p.local,
@@ -242,6 +261,65 @@ async function borrarPartido(id) {
   if (error) throw new Error(error.message);
 }
 
+// Detecta partidos duplicados (mismo local+visitante+fecha+temporada), migra los
+// pronósticos al registro con resultado y elimina los duplicados sin resultado.
+async function repararDuplicados() {
+  const { data: partidos, error } = await supabase
+    .from('partidos')
+    .select('id, temporada, fecha_numero, local, visitante, goles_local, goles_visitante, estado, created_at')
+    .order('created_at', { ascending: true });
+  if (error) throw new Error(error.message);
+
+  const grupos = {};
+  for (const p of partidos) {
+    const key = `${p.temporada}||${p.fecha_numero}||${p.local}||${p.visitante}`;
+    if (!grupos[key]) grupos[key] = [];
+    grupos[key].push(p);
+  }
+
+  let pronosticosMigrados = 0;
+  let partidosEliminados = 0;
+  const detalle = [];
+
+  for (const lista of Object.values(grupos)) {
+    if (lista.length <= 1) continue;
+
+    // El "correcto": primero los que tienen resultado (finalizado), luego por antigüedad.
+    lista.sort((a, b) => {
+      const peso = (p) => (p.estado === 'finalizado' ? 2 : p.goles_local != null ? 1 : 0);
+      return peso(b) - peso(a) || new Date(a.created_at) - new Date(b.created_at);
+    });
+
+    const correcto = lista[0];
+    const aEliminar = lista.slice(1);
+
+    for (const dup of aEliminar) {
+      const { data: prons } = await supabase
+        .from('pronosticos').select('id, jugador_id').eq('partido_id', dup.id);
+
+      if (prons && prons.length > 0) {
+        for (const pron of prons) {
+          const { data: ya } = await supabase
+            .from('pronosticos').select('id')
+            .eq('partido_id', correcto.id).eq('jugador_id', pron.jugador_id)
+            .maybeSingle();
+          if (!ya) {
+            await supabase.from('pronosticos').update({ partido_id: correcto.id }).eq('id', pron.id);
+            pronosticosMigrados++;
+          }
+        }
+      }
+      await supabase.from('pronosticos').delete().eq('partido_id', dup.id);
+      await supabase.from('partidos').delete().eq('id', dup.id);
+      partidosEliminados++;
+    }
+
+    detalle.push(`${correcto.local} vs ${correcto.visitante} (fecha ${correcto.fecha_numero}): ${aEliminar.length} duplicado(s) eliminado(s)`);
+  }
+
+  return { pronosticosMigrados, partidosEliminados, detalle };
+}
+
 // Devuelve las temporadas disponibles con sus numeros de fecha.
 // Ej: [{ temporada: '2023', fechas: [1,2,3,...] }]
 async function temporadasDisponibles() {
@@ -285,4 +363,5 @@ module.exports = {
   borrarPartido,
   guardarPartidos,
   repararEscudos,
+  repararDuplicados,
 };
