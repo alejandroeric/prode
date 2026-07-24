@@ -266,8 +266,8 @@ async function borrarPartido(id) {
 async function repararDuplicados() {
   const { data: partidos, error } = await supabase
     .from('partidos')
-    .select('id, temporada, fecha_numero, local, visitante, goles_local, goles_visitante, estado, created_at')
-    .order('created_at', { ascending: true });
+    .select('id, temporada, fecha_numero, local, visitante, goles_local, goles_visitante, estado')
+    .order('inicio', { ascending: true, nullsFirst: false });
   if (error) throw new Error(error.message);
 
   const grupos = {};
