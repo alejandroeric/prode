@@ -48,6 +48,7 @@ const MAPA_EQUIPOS = {
   'Deportivo Riestra':                    { id: 476,  logo: 'https://r2.thesportsdb.com/images/media/team/badge/332h0l1578824392.png' },
   'Independiente Rivadavia':              { id: 2288, logo: 'https://r2.thesportsdb.com/images/media/team/badge/qgzi2b1769406125.png' },
   'Estudiantes de Río Cuarto':            { id: 9665, logo: 'https://r2.thesportsdb.com/images/media/team/badge/391thp1775793121.png' },
+  'Aldosivi':                             { id: 135150, logo: 'https://r2.thesportsdb.com/images/media/team/badge/nqrjqb1517767667.png' },
 };
 
 // Normaliza texto para comparacion flexible.
