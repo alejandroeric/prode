@@ -39,7 +39,6 @@ const MAPA_EQUIPOS = {
   'Sarmiento':                            { id: 720,  logo: 'https://r2.thesportsdb.com/images/media/team/badge/xxofu71677634191.png' },
   'Argentinos Juniors':                   { id: 458,  logo: 'https://r2.thesportsdb.com/images/media/team/badge/uqfjuo1769234850.png' },
   'Atlético Tucumán':                     { id: 455,  logo: 'https://r2.thesportsdb.com/images/media/team/badge/m5i2q21775755577.png' },
-  'Godoy Cruz':                           { id: 439,  logo: 'https://r2.thesportsdb.com/images/media/team/badge/d3c0ds1517768584.png' },
   'Central Córdoba de Santiago del Estero': { id: 1065, logo: 'https://r2.thesportsdb.com/images/media/team/badge/d62xkc1576101576.png' },
   'Barracas Central':                     { id: 2432, logo: 'https://r2.thesportsdb.com/images/media/team/badge/rbkjba1707458543.png' },
   'Instituto':                            { id: 2294, logo: 'https://r2.thesportsdb.com/images/media/team/badge/jup59w1578825794.png' },
