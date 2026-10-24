@@ -11,7 +11,7 @@ function signo(a, b) {
 // 6 = resultado exacto | 3 = acerto ganador/empate | 0 = fallo.
 function puntosDe(pron, partido) {
   if (partido.goles_local == null || partido.goles_visitante == null) return 0;
-  if (pron.goles_local === partido.goles_local && pron.goles_visitante === partido.goles_visitante) {
+  if (Number(pron.goles_local) === Number(partido.goles_local) && Number(pron.goles_visitante) === Number(partido.goles_visitante)) {
     return 6;
   }
   if (signo(pron.goles_local, pron.goles_visitante) === signo(partido.goles_local, partido.goles_visitante)) {
@@ -30,13 +30,13 @@ async function tablaDeGrupo(grupoId, temporada) {
 
   const ids = jugadores.map((j) => j.id);
   let prons = [];
-  if (ids.length) {
+  for (const id of ids) {
     const { data, error: e2 } = await supabase
       .from('pronosticos')
       .select('jugador_id, goles_local, goles_visitante, partidos ( goles_local, goles_visitante, estado, temporada )')
-      .in('jugador_id', ids);
+      .eq('jugador_id', id);
     if (e2) throw new Error(e2.message);
-    prons = data;
+    if (data) prons.push(...data);
   }
 
   // Inicializar estadisticas por jugador.
