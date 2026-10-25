@@ -603,6 +603,7 @@ function dibujarAdminPartidos(partidos) {
     });
 
     li.querySelector('.btn-borrar').addEventListener('click', async () => {
+      if (!confirm(`¿Borrar el partido ${p.local} vs ${p.visitante}?\nEsta acción no se puede deshacer.`)) return;
       await fetch(`/api/admin/partidos/${p.id}`, { method: 'DELETE', headers: cabeceraAuth() });
       cargarConteoPartidos();
       verPartidosDeFecha();
