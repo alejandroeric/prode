@@ -103,11 +103,15 @@ router.get('/grupos/:id/tabla', requiereAdmin, async (req, res) => {
   }
 });
 
-// GET /api/admin/grupos/:id/campeon  ->  campeon(es) del torneo anterior (o activo) de ese grupo.
+// GET /api/admin/grupos/:id/campeon  ->  campeon(es) de un torneo para ese grupo.
+// Acepta ?torneo=X para elegir el torneo directamente; si no se pasa, usa la config.
 router.get('/grupos/:id/campeon', requiereAdmin, async (req, res) => {
   try {
-    const cfg = await obtenerConfig();
-    const torneo = cfg.temporada_anterior || cfg.temporada_activa || null;
+    let torneo = req.query.torneo || null;
+    if (!torneo) {
+      const cfg = await obtenerConfig();
+      torneo = cfg.temporada_anterior || cfg.temporada_activa || null;
+    }
     const camp = await campeonesDeGrupo(req.params.id, torneo);
     const campeones = camp ? camp.podio.filter((p) => p.posicion === 1).map((p) => p.nombre) : [];
     res.json({ campeones, torneo: torneo || null });

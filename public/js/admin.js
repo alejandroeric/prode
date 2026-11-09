@@ -180,19 +180,21 @@ async function compartirTabla(grupoId, nombreGrupo, imagenInput) {
   }
 }
 
-// Anunciar el campeon del torneo (anterior o activo) por WhatsApp, con una frase personalizada.
-async function anunciarCampeon(grupoId, frase, imagenInput) {
+// Anunciar el campeon de un torneo por WhatsApp, con una frase personalizada.
+async function anunciarCampeon(grupoId, torneo, frase, imagenInput) {
+  if (!torneo) { alert('Elegí el torneo a anunciar.'); return; }
   try {
-    const res = await fetch('/api/admin/grupos/' + grupoId + '/campeon', { headers: cabeceraAuth() });
-    const { campeones, torneo } = await res.json();
-    if (!campeones.length) {
-      alert('No se encontró campeón para este grupo. Verificá que haya partidos finalizados.');
+    const url = `/api/admin/grupos/${grupoId}/campeon?torneo=${encodeURIComponent(torneo)}`;
+    const res = await fetch(url, { headers: cabeceraAuth() });
+    const datos = await res.json();
+    if (!datos.campeones || !datos.campeones.length) {
+      alert(`No se encontró campeón para ${torneo}. Verificá que haya partidos finalizados en ese torneo.`);
       return;
     }
-    const quien = campeones.join(' y ');
-    const verbo = campeones.length > 1 ? 'salieron campeones' : 'salió campeón';
+    const quien = datos.campeones.join(' y ');
+    const verbo = datos.campeones.length > 1 ? 'salieron campeones' : 'salió campeón';
     const cierre = frase && frase.trim() ? '\n' + frase.trim() : '';
-    await enviarWhatsApp(`🏆 ¡${quien} ${verbo} del ${torneo}! 🎉${cierre}`, imagenInput);
+    await enviarWhatsApp(`🏆 ¡${quien} ${verbo} del ${datos.torneo}! 🎉${cierre}`, imagenInput);
   } catch {
     alert('No se pudo obtener el campeón.');
   }
@@ -702,6 +704,13 @@ async function cargarConfig() {
       vTemp.innerHTML = `<option value="">Elegí temporada…</option>` + opciones;
       // En la carga manual, dejamos preseleccionado el torneo activo.
       if (activa && temporadas.includes(activa)) mTemp.value = activa;
+
+      // Selector de torneo en "Anunciar campeón".
+      const campTorneo = document.getElementById('noti-campeon-torneo');
+      if (campTorneo) {
+        campTorneo.innerHTML = opciones;
+        if (activa && temporadas.includes(activa)) campTorneo.value = activa;
+      }
     }
   } catch {
     // si falla, dejamos los campos como esten
@@ -750,13 +759,14 @@ document.getElementById('btn-noti-tabla').addEventListener('click', () => {
   compartirTabla(id, grupo ? grupo.nombre : '', img);
 });
 
-// Anunciar campeon (Notificaciones): grupo del desplegable + frase editable.
+// Anunciar campeon (Notificaciones): grupo + torneo elegidos + frase editable.
 document.getElementById('btn-noti-campeon').addEventListener('click', () => {
   const id = document.getElementById('noti-campeon-grupo').value;
   if (!id) { alert('Primero creá un grupo.'); return; }
+  const torneo = document.getElementById('noti-campeon-torneo').value;
   const frase = document.getElementById('noti-campeon-frase').value;
   const img = document.getElementById('noti-campeon-img');
-  anunciarCampeon(id, frase, img);
+  anunciarCampeon(id, torneo, frase, img);
 });
 
 // ----- Pestañas del panel de admin -----
