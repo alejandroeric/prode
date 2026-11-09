@@ -5,7 +5,7 @@ const router = express.Router();
 const { login, logout, requiereAdmin } = require('../services/adminAuth');
 const { crearJugador, listarJugadores, actualizarJugador, borrarJugador } = require('../services/jugadores');
 const { crearGrupo, listarGrupos, actualizarGrupo, borrarGrupo } = require('../services/grupos');
-const { tablaDeGrupo, campeonesDeGrupo } = require('../services/puntuacion');
+const { tablaDeGrupo, campeonesDeGrupo, historialTorneo } = require('../services/puntuacion');
 const { obtenerConfig, actualizarConfig } = require('../services/configuracion');
 const {
   sincronizarDesdeApi,
@@ -252,6 +252,20 @@ router.post('/fixture/sincronizar', requiereAdmin, async (req, res) => {
     res.json(resultado);
   } catch (e) {
     res.status(502).json({ error: 'No se pudo sincronizar con la API' });
+  }
+});
+
+// GET /api/admin/historial?grupo=X&torneo=Y  ->  tabla final + destacados de un torneo terminado.
+router.get('/historial', requiereAdmin, async (req, res) => {
+  const { grupo, torneo } = req.query;
+  if (!grupo || !torneo) {
+    return res.status(400).json({ error: 'Faltan grupo y torneo' });
+  }
+  try {
+    const datos = await historialTorneo(grupo, torneo);
+    res.json({ ...datos, torneo });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'No se pudo obtener el historial' });
   }
 });
 

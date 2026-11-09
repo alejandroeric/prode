@@ -153,11 +153,13 @@ async function cargarGrupos() {
       .map((g) => `<option value="${g.id}">${escaparHtml(g.nombre)}</option>`)
       .join('');
     selectorGrupoJugador.innerHTML = opcionesGrupo;
-    // Tambien los desplegables de Notificaciones (compartir tabla / anunciar campeon).
+    // Tambien los desplegables de Notificaciones e Historial.
     const notiTabla = document.getElementById('noti-tabla-grupo');
     const notiCampeon = document.getElementById('noti-campeon-grupo');
+    const histGrupo = document.getElementById('hist-grupo');
     if (notiTabla) notiTabla.innerHTML = opcionesGrupo;
     if (notiCampeon) notiCampeon.innerHTML = opcionesGrupo;
+    if (histGrupo) histGrupo.innerHTML = opcionesGrupo;
   } catch {
     // si falla, no actualizamos
   }
@@ -705,11 +707,16 @@ async function cargarConfig() {
       // En la carga manual, dejamos preseleccionado el torneo activo.
       if (activa && temporadas.includes(activa)) mTemp.value = activa;
 
-      // Selector de torneo en "Anunciar campeón".
+      // Selector de torneo en "Anunciar campeón" e "Historial".
       const campTorneo = document.getElementById('noti-campeon-torneo');
+      const histTorneo = document.getElementById('hist-torneo');
       if (campTorneo) {
         campTorneo.innerHTML = opciones;
         if (activa && temporadas.includes(activa)) campTorneo.value = activa;
+      }
+      if (histTorneo) {
+        histTorneo.innerHTML = opciones;
+        if (activa && temporadas.includes(activa)) histTorneo.value = activa;
       }
     }
   } catch {
@@ -767,6 +774,92 @@ document.getElementById('btn-noti-campeon').addEventListener('click', () => {
   const frase = document.getElementById('noti-campeon-frase').value;
   const img = document.getElementById('noti-campeon-img');
   anunciarCampeon(id, torneo, frase, img);
+});
+
+// ----- Historial de torneos -----
+
+let historialCache = null; // guarda el ultimo historial cargado para compartirlo
+
+function renderizarHistorial(datos) {
+  const { tabla, destacados, torneo } = datos;
+  const medallas = ['🥇', '🥈', '🥉'];
+
+  const filasTabla = tabla.map((t, i) => `
+    <div class="hist-fila">
+      <span class="hist-pos">${medallas[i] || t.posicion + 'º'}</span>
+      <span class="hist-nombre">${escaparHtml(t.avatar)} ${escaparHtml(t.nombre)}</span>
+      <span class="hist-pts">${t.puntos} pts</span>
+      <span class="hist-extra">${t.exactos} exactos · ${t.efectividad}%</span>
+    </div>`).join('');
+
+  let bloqueDestacados = '';
+  if (destacados) {
+    const { masExactos, mejorFecha, mejorEfectividad } = destacados;
+    bloqueDestacados = `
+      <div class="hist-destacados">
+        <h3 class="subtitulo-mini">Destacados</h3>
+        <div class="hist-dest-item">🎯 Más exactos: <strong>${escaparHtml(masExactos.nombres.join(' y '))}</strong> (${masExactos.cantidad})</div>
+        ${mejorFecha ? `<div class="hist-dest-item">🔥 Mejor fecha: <strong>${escaparHtml(mejorFecha.nombre)}</strong> — Fecha ${mejorFecha.fecha} (${mejorFecha.puntos} pts)</div>` : ''}
+        <div class="hist-dest-item">📊 Mayor efectividad: <strong>${escaparHtml(mejorEfectividad.nombre)}</strong> (${mejorEfectividad.efectividad}%)</div>
+      </div>`;
+  }
+
+  document.getElementById('historial-contenido').innerHTML = `
+    <h3 class="hist-titulo">🏆 ${escaparHtml(torneo)} — Tabla final</h3>
+    <div class="hist-tabla">${filasTabla}</div>
+    ${bloqueDestacados}`;
+  document.getElementById('historial-panel').hidden = false;
+}
+
+function textoHistorialParaWsp(datos) {
+  const { tabla, destacados, torneo } = datos;
+  const medallas = ['🥇', '🥈', '🥉'];
+  const lineas = tabla.map((t, i) =>
+    `${medallas[i] || t.posicion + 'º'} ${t.nombre} — ${t.puntos} pts (${t.exactos} exactos · ${t.efectividad}%)`
+  );
+  let texto = `🏆 ${torneo} — Resultado final\n\n${lineas.join('\n')}`;
+  if (destacados) {
+    const { masExactos, mejorFecha, mejorEfectividad } = destacados;
+    texto += `\n\n⭐ Destacados\n🎯 Más exactos: ${masExactos.nombres.join(' y ')} (${masExactos.cantidad})`;
+    if (mejorFecha) texto += `\n🔥 Mejor fecha: ${mejorFecha.nombre} — Fecha ${mejorFecha.fecha} (${mejorFecha.puntos} pts)`;
+    texto += `\n📊 Mayor efectividad: ${mejorEfectividad.nombre} (${mejorEfectividad.efectividad}%)`;
+  }
+  return texto;
+}
+
+document.getElementById('btn-ver-historial').addEventListener('click', async () => {
+  const grupoId = document.getElementById('hist-grupo').value;
+  const torneo = document.getElementById('hist-torneo').value;
+  if (!grupoId || !torneo) { alert('Elegí un grupo y un torneo.'); return; }
+
+  const btn = document.getElementById('btn-ver-historial');
+  btn.disabled = true;
+  btn.textContent = 'Cargando...';
+  try {
+    const res = await fetch(
+      `/api/admin/historial?grupo=${encodeURIComponent(grupoId)}&torneo=${encodeURIComponent(torneo)}`,
+      { headers: cabeceraAuth() }
+    );
+    const datos = await res.json();
+    if (!res.ok) { alert(datos.error || 'No se pudo cargar.'); return; }
+    if (!datos.tabla || !datos.tabla.some((t) => t.jugados > 0)) {
+      alert(`No hay partidos finalizados para ${torneo} en este grupo.`);
+      return;
+    }
+    historialCache = datos;
+    renderizarHistorial(datos);
+  } catch {
+    alert('No se pudo conectar con el servidor.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Ver torneo finalizado';
+  }
+});
+
+document.getElementById('btn-compartir-historial').addEventListener('click', () => {
+  if (!historialCache) return;
+  const img = document.getElementById('hist-img');
+  enviarWhatsApp(textoHistorialParaWsp(historialCache), img);
 });
 
 // ----- Pestañas del panel de admin -----

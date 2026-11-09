@@ -132,4 +132,70 @@ async function perfilDeJugador(jugadorId, grupoId, temporada) {
   return { jugador: fila, historial };
 }
 
-module.exports = { puntosDe, tablaDeGrupo, perfilDeJugador, campeonesDeGrupo };
+// Arma el historial completo de un torneo terminado: tabla final + 3 destacados.
+// destacados: masExactos, mejorFecha individual, mejor efectividad.
+async function historialTorneo(grupoId, temporada) {
+  const tabla = await tablaDeGrupo(grupoId, temporada);
+  if (!tabla.length || !tabla.some((t) => t.jugados > 0)) {
+    return { tabla, destacados: null };
+  }
+
+  const ids = tabla.map((t) => t.id);
+  let prons = [];
+  for (const id of ids) {
+    const { data, error } = await supabase
+      .from('pronosticos')
+      .select('jugador_id, goles_local, goles_visitante, partidos ( goles_local, goles_visitante, estado, temporada, fecha_numero )')
+      .eq('jugador_id', id);
+    if (error) throw new Error(error.message);
+    if (data) prons.push(...data);
+  }
+
+  const relevantes = prons.filter((p) =>
+    p.partidos &&
+    p.partidos.estado === 'finalizado' &&
+    p.partidos.temporada === temporada &&
+    p.partidos.goles_local != null
+  );
+
+  // Puntos acumulados por jugador por fecha.
+  const porFecha = {};
+  for (const p of relevantes) {
+    const jid = p.jugador_id;
+    const fecha = p.partidos.fecha_numero;
+    if (!porFecha[jid]) porFecha[jid] = {};
+    porFecha[jid][fecha] = (porFecha[jid][fecha] || 0) + puntosDe(p, p.partidos);
+  }
+
+  // Mejor fecha individual.
+  let mejorFecha = null;
+  for (const jid of Object.keys(porFecha)) {
+    const fila = tabla.find((t) => t.id === jid);
+    if (!fila) continue;
+    for (const [fecha, pts] of Object.entries(porFecha[jid])) {
+      if (!mejorFecha || pts > mejorFecha.puntos) {
+        mejorFecha = { nombre: fila.nombre, fecha: Number(fecha), puntos: pts };
+      }
+    }
+  }
+
+  // Más exactos (con empate).
+  const maxExactos = Math.max(...tabla.map((t) => t.exactos));
+  const masExactosNombres = tabla.filter((t) => t.exactos === maxExactos).map((t) => t.nombre);
+
+  // Mejor efectividad (entre los que jugaron al menos la mitad de partidos que el lider).
+  const minJugados = Math.floor(tabla[0].jugados * 0.5);
+  const conMinJugados = tabla.filter((t) => t.jugados >= minJugados);
+  const mejorEf = conMinJugados.reduce((a, b) => (b.efectividad > a.efectividad ? b : a));
+
+  return {
+    tabla,
+    destacados: {
+      masExactos: { nombres: masExactosNombres, cantidad: maxExactos },
+      mejorFecha,
+      mejorEfectividad: { nombre: mejorEf.nombre, efectividad: mejorEf.efectividad },
+    },
+  };
+}
+
+module.exports = { puntosDe, tablaDeGrupo, perfilDeJugador, campeonesDeGrupo, historialTorneo };

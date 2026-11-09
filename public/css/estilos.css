@@ -1011,6 +1011,56 @@ body.con-nav {
   cursor: pointer;
 }
 
+/* ----- Historial de torneos (admin) ----- */
+
+.hist-titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  margin: 1rem 0 0.5rem;
+}
+
+.hist-tabla {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.hist-fila {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+}
+
+.hist-pos { font-size: 1.1rem; }
+.hist-nombre { font-weight: 600; color: #e0e0e0; }
+.hist-pts { font-weight: 700; color: #00e676; white-space: nowrap; }
+.hist-extra { font-size: 0.78rem; color: #888; white-space: nowrap; }
+
+.hist-destacados {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hist-dest-item {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.hist-dest-item strong {
+  color: #fff;
+}
+
 /* ----- Pantalla Mis Pronosticos ----- */
 
 .tarjeta-partido .equipo .gol-input {

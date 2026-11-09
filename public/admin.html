@@ -110,6 +110,19 @@
         </form>
         <p class="texto-ayuda">El "torneo activo" define qué cuenta la tabla. Cambiarlo a uno nuevo = arrancar un torneo desde cero (el anterior queda guardado como historial). 🔄</p>
 
+        <h2 class="subtitulo-seccion">Historial de torneos</h2>
+        <p class="texto-ayuda">Seleccioná un torneo terminado para ver la tabla final y los destacados.</p>
+        <div class="formulario">
+          <select id="hist-grupo" class="selector"></select>
+          <select id="hist-torneo" class="selector"></select>
+          <button id="btn-ver-historial" type="button">🔍 Ver torneo finalizado</button>
+        </div>
+        <div id="historial-panel" hidden>
+          <div id="historial-contenido"></div>
+          <label class="label-imagen">📷 Imagen opcional: <input type="file" id="hist-img" accept="image/*" /></label>
+          <button id="btn-compartir-historial" type="button" class="boton-wsp">📲 Compartir resultado</button>
+        </div>
+
         <h2 class="subtitulo-seccion">Notificaciones</h2>
         <p class="texto-ayuda">Cada botón abre WhatsApp con el mensaje listo; vos elegís el grupo/chat y enviás.</p>
 
