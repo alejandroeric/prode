@@ -994,6 +994,23 @@ body.con-nav {
   cursor: pointer;
 }
 
+.label-imagen {
+  font-size: 0.85rem;
+  color: #b0b0b0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.label-imagen input[type="file"] {
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 /* ----- Pantalla Mis Pronosticos ----- */
 
 .tarjeta-partido .equipo .gol-input {

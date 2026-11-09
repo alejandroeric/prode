@@ -41,8 +41,20 @@ function cabeceraAuth() {
   return { Authorization: 'Bearer ' + localStorage.getItem(CLAVE_TOKEN) };
 }
 
-// Abre WhatsApp con un mensaje ya escrito (el admin elige el chat y envia).
-function enviarWhatsApp(texto) {
+// Abre WhatsApp con un mensaje (y opcionalmente una imagen).
+// Si hay imagen y el navegador soporta Web Share API, usa el selector nativo del SO.
+// Si no, cae al enlace wa.me (solo texto).
+async function enviarWhatsApp(texto, imagenInput) {
+  const archivo = imagenInput && imagenInput.files && imagenInput.files[0];
+  if (archivo && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+    try {
+      await navigator.share({ files: [archivo], text: texto });
+      return;
+    } catch {
+      // si el usuario cancela o falla, no hacemos nada
+      return;
+    }
+  }
   window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
 }
 
@@ -152,35 +164,35 @@ async function cargarGrupos() {
 }
 
 // Compartir la tabla de un grupo por WhatsApp.
-async function compartirTabla(grupoId, nombreGrupo) {
+async function compartirTabla(grupoId, nombreGrupo, imagenInput) {
   try {
     const res = await fetch('/api/admin/grupos/' + grupoId + '/tabla', { headers: cabeceraAuth() });
     const tabla = await res.json();
     if (!tabla.length) {
-      enviarWhatsApp(`🏆 Tabla - ${nombreGrupo}\n(todavía sin puntos)`);
+      await enviarWhatsApp(`🏆 Tabla - ${nombreGrupo}\n(todavía sin puntos)`, imagenInput);
       return;
     }
     const medallas = ['🥇', '🥈', '🥉'];
     const lineas = tabla.map((t, i) => `${medallas[i] || t.posicion + 'º'} ${t.nombre} - ${t.puntos} pts`);
-    enviarWhatsApp(`🏆 Tabla - ${nombreGrupo}\n\n${lineas.join('\n')}`);
+    await enviarWhatsApp(`🏆 Tabla - ${nombreGrupo}\n\n${lineas.join('\n')}`, imagenInput);
   } catch {
     alert('No se pudo obtener la tabla.');
   }
 }
 
-// Anunciar el campeon del torneo anterior por WhatsApp, con una frase personalizada.
-async function anunciarCampeon(grupoId, frase) {
+// Anunciar el campeon del torneo (anterior o activo) por WhatsApp, con una frase personalizada.
+async function anunciarCampeon(grupoId, frase, imagenInput) {
   try {
     const res = await fetch('/api/admin/grupos/' + grupoId + '/campeon', { headers: cabeceraAuth() });
     const { campeones, torneo } = await res.json();
     if (!campeones.length) {
-      alert('Todavía no hay campeón del torneo anterior en este grupo.');
+      alert('No se encontró campeón para este grupo. Verificá que haya partidos finalizados.');
       return;
     }
     const quien = campeones.join(' y ');
     const verbo = campeones.length > 1 ? 'salieron campeones' : 'salió campeón';
     const cierre = frase && frase.trim() ? '\n' + frase.trim() : '';
-    enviarWhatsApp(`🏆 ¡${quien} ${verbo} del ${torneo}! 🎉${cierre}`);
+    await enviarWhatsApp(`🏆 ¡${quien} ${verbo} del ${torneo}! 🎉${cierre}`, imagenInput);
   } catch {
     alert('No se pudo obtener el campeón.');
   }
@@ -589,17 +601,36 @@ function dibujarAdminPartidos(partidos) {
     const [golL, golV] = li.querySelectorAll('.gol-input');
     const selEstado = li.querySelector('.select-estado');
 
-    li.querySelector('.btn-guardar').addEventListener('click', async () => {
-      await fetch(`/api/admin/partidos/${p.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
-        body: JSON.stringify({
-          goles_local: golL.value === '' ? null : Number(golL.value),
-          goles_visitante: golV.value === '' ? null : Number(golV.value),
-          estado: selEstado.value,
-        }),
-      });
-      verPartidosDeFecha();
+    const btnGuardar = li.querySelector('.btn-guardar');
+    btnGuardar.addEventListener('click', async () => {
+      const estadoNuevo = selEstado.value;
+      btnGuardar.disabled = true;
+      btnGuardar.textContent = 'Guardando...';
+      try {
+        const res = await fetch(`/api/admin/partidos/${p.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', ...cabeceraAuth() },
+          body: JSON.stringify({
+            goles_local: golL.value === '' ? null : Number(golL.value),
+            goles_visitante: golV.value === '' ? null : Number(golV.value),
+            estado: estadoNuevo,
+          }),
+        });
+        if (res.ok) {
+          btnGuardar.textContent = 'Guardado ✅';
+          if (estadoNuevo === 'finalizado') {
+            const temp = document.getElementById('v-temporada').value;
+            const fecha = document.getElementById('v-fecha').value;
+            descargarBackupFecha(temp, fecha);
+          }
+        } else {
+          btnGuardar.textContent = 'Error ❌';
+          btnGuardar.disabled = false;
+        }
+      } catch {
+        btnGuardar.textContent = 'Error ❌';
+        btnGuardar.disabled = false;
+      }
     });
 
     li.querySelector('.btn-borrar').addEventListener('click', async () => {
@@ -610,6 +641,28 @@ function dibujarAdminPartidos(partidos) {
     });
 
     listaAdminPartidos.appendChild(li);
+  }
+}
+
+// Descarga un JSON con todos los pronósticos de una fecha (backup automático).
+async function descargarBackupFecha(temporada, fecha) {
+  if (!temporada || !fecha) return;
+  try {
+    const res = await fetch(
+      `/api/admin/backup-fecha?temporada=${encodeURIComponent(temporada)}&fecha=${encodeURIComponent(fecha)}`,
+      { headers: cabeceraAuth() }
+    );
+    if (!res.ok) return;
+    const datos = await res.json();
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup-prode-${temporada}-fecha${fecha}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    // si falla, no interrumpimos el flujo
   }
 }
 
@@ -683,7 +736,8 @@ formConfig.addEventListener('submit', async (evento) => {
 
 // Recordatorio generico al grupo por WhatsApp.
 document.getElementById('btn-recordatorio').addEventListener('click', () => {
-  enviarWhatsApp('⏰ ¡Recordatorio del Prode!\nNo te olvides de cargar tus pronósticos de la próxima fecha antes de que empiecen los partidos. ⚽🔮');
+  const img = document.getElementById('noti-recordatorio-img');
+  enviarWhatsApp('⏰ ¡Recordatorio del Prode!\nNo te olvides de cargar tus pronósticos de la próxima fecha antes de que empiecen los partidos. ⚽🔮', img);
 });
 
 // Compartir tabla (Notificaciones): toma el grupo del desplegable.
@@ -692,7 +746,8 @@ document.getElementById('btn-noti-tabla').addEventListener('click', () => {
   const id = sel.value;
   if (!id) { alert('Primero creá un grupo.'); return; }
   const grupo = gruposCache.find((g) => g.id === id);
-  compartirTabla(id, grupo ? grupo.nombre : '');
+  const img = document.getElementById('noti-tabla-img');
+  compartirTabla(id, grupo ? grupo.nombre : '', img);
 });
 
 // Anunciar campeon (Notificaciones): grupo del desplegable + frase editable.
@@ -700,7 +755,8 @@ document.getElementById('btn-noti-campeon').addEventListener('click', () => {
   const id = document.getElementById('noti-campeon-grupo').value;
   if (!id) { alert('Primero creá un grupo.'); return; }
   const frase = document.getElementById('noti-campeon-frase').value;
-  anunciarCampeon(id, frase);
+  const img = document.getElementById('noti-campeon-img');
+  anunciarCampeon(id, frase, img);
 });
 
 // ----- Pestañas del panel de admin -----

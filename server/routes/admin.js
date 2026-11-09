@@ -103,13 +103,14 @@ router.get('/grupos/:id/tabla', requiereAdmin, async (req, res) => {
   }
 });
 
-// GET /api/admin/grupos/:id/campeon  ->  campeon(es) del torneo anterior de ese grupo.
+// GET /api/admin/grupos/:id/campeon  ->  campeon(es) del torneo anterior (o activo) de ese grupo.
 router.get('/grupos/:id/campeon', requiereAdmin, async (req, res) => {
   try {
-    const anterior = (await obtenerConfig()).temporada_anterior;
-    const camp = await campeonesDeGrupo(req.params.id, anterior);
+    const cfg = await obtenerConfig();
+    const torneo = cfg.temporada_anterior || cfg.temporada_activa || null;
+    const camp = await campeonesDeGrupo(req.params.id, torneo);
     const campeones = camp ? camp.podio.filter((p) => p.posicion === 1).map((p) => p.nombre) : [];
-    res.json({ campeones, torneo: anterior || null });
+    res.json({ campeones, torneo: torneo || null });
   } catch (e) {
     res.status(500).json({ error: 'No se pudo obtener el campeon' });
   }
@@ -247,6 +248,44 @@ router.post('/fixture/sincronizar', requiereAdmin, async (req, res) => {
     res.json(resultado);
   } catch (e) {
     res.status(502).json({ error: 'No se pudo sincronizar con la API' });
+  }
+});
+
+// GET /api/admin/backup-fecha  ->  devuelve todos los pronósticos de una fecha como JSON (backup).
+router.get('/backup-fecha', requiereAdmin, async (req, res) => {
+  const { temporada, fecha } = req.query;
+  if (!temporada || !fecha) {
+    return res.status(400).json({ error: 'Faltan temporada y fecha' });
+  }
+  try {
+    const { supabase } = require('../services/supabase');
+    const { data: partidos, error: e1 } = await supabase
+      .from('partidos')
+      .select('id, local, visitante, goles_local, goles_visitante, estado')
+      .eq('temporada', temporada)
+      .eq('fecha_numero', Number(fecha));
+    if (e1) throw new Error(e1.message);
+
+    const ids = (partidos || []).map((p) => p.id);
+    let pronosticos = [];
+    for (const id of ids) {
+      const { data, error: e2 } = await supabase
+        .from('pronosticos')
+        .select('jugador_id, goles_local, goles_visitante, jugadores ( nombre ), partidos ( local, visitante )')
+        .eq('partido_id', id);
+      if (e2) throw new Error(e2.message);
+      if (data) pronosticos.push(...data);
+    }
+
+    res.json({
+      generado: new Date().toISOString(),
+      temporada,
+      fecha: Number(fecha),
+      partidos: partidos || [],
+      pronosticos,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'No se pudo generar el backup' });
   }
 });
 

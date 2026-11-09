@@ -114,11 +114,15 @@
         <p class="texto-ayuda">Cada botón abre WhatsApp con el mensaje listo; vos elegís el grupo/chat y enviás.</p>
 
         <h3 class="subtitulo-mini">Recordatorio</h3>
-        <button id="btn-recordatorio" type="button" class="boton-wsp">📲 Enviar recordatorio</button>
+        <div class="formulario">
+          <label class="label-imagen">📷 Imagen opcional: <input type="file" id="noti-recordatorio-img" accept="image/*" /></label>
+          <button id="btn-recordatorio" type="button" class="boton-wsp">📲 Enviar recordatorio</button>
+        </div>
 
         <h3 class="subtitulo-mini">Compartir tabla de un grupo</h3>
         <div class="formulario">
           <select id="noti-tabla-grupo" class="selector"></select>
+          <label class="label-imagen">📷 Imagen opcional: <input type="file" id="noti-tabla-img" accept="image/*" /></label>
           <button id="btn-noti-tabla" type="button" class="boton-wsp">📲 Compartir tabla</button>
         </div>
 
@@ -126,6 +130,7 @@
         <div class="formulario">
           <select id="noti-campeon-grupo" class="selector"></select>
           <input type="text" id="noti-campeon-frase" placeholder="Frase final del mensaje" value="LTA, sigan participando 😎" />
+          <label class="label-imagen">📷 Imagen opcional: <input type="file" id="noti-campeon-img" accept="image/*" /></label>
           <button id="btn-noti-campeon" type="button" class="boton-wsp">🏆 Anunciar campeón</button>
         </div>
       </div>
